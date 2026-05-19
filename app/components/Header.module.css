@@ -1,0 +1,253 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 40px);
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.logoImg {
+  height: 52px;
+  width: auto;
+  display: block;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.navLink {
+  position: relative;
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-ink);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.navLink:hover {
+  background: var(--color-surface-alt);
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 4px;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.2s ease;
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  font-family: inherit;
+}
+
+.iconBtn:hover {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.userWrap {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 280px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dropdown::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  transform: rotate(45deg);
+}
+
+.dropdownHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dropdownTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.dropdownSub {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.dropdownActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btnPrimary,
+.btnOutline {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 18px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+  border: 1px solid transparent;
+  width: 100%;
+}
+
+.btnPrimary {
+  background: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.btnPrimary:hover {
+  background: var(--color-accent-hover);
+}
+
+.btnOutline {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.btnOutline:hover {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.menuBtn {
+  display: none;
+}
+
+.mobilePanel {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.mobileNav {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 8px clamp(20px, 4vw, 40px) 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileLink {
+  padding: 14px 6px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.mobileLink:last-child {
+  border-bottom: none;
+}
+
+.mobileLink:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-alt);
+}
+
+@media (max-width: 900px) {
+  .nav {
+    display: none;
+  }
+  .menuBtn {
+    display: inline-flex;
+  }
+  .inner {
+    height: 80px;
+  }
+  .logoImg {
+    height: 42px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inner {
+    height: 68px;
+  }
+  .logoImg {
+    height: 34px;
+  }
+  .iconBtn {
+    width: 40px;
+    height: 40px;
+  }
+}
