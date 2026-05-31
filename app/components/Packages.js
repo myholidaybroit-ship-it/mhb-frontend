@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import styles from "./Packages.module.css";
+import WishlistButton from "./WishlistButton";
 
 const W = (slug, file) =>
   `https://static.wixstatic.com/media/${slug}/v1/fill/w_900,h_700,al_c,q_85,enc_avif,quality_auto/${file}`;
@@ -83,6 +84,19 @@ const TABS = [
   { id: "long", label: "10+ Days" },
 ];
 
+const SLUG_OVERRIDE = {
+  "France + Switzerland": "france-switzerland",
+  "Singapore + Malaysia": "singapore",
+};
+
+function toSlug(name) {
+  if (SLUG_OVERRIDE[name]) return SLUG_OVERRIDE[name];
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 const SLOT_CLASS = [
   "slotWide",
   "slotLeft1",
@@ -124,7 +138,7 @@ export default function Packages() {
           {items.map((p, i) => (
             <a
               key={`${tab}-${p.name}`}
-              href="#"
+              href={`/destinations/${toSlug(p.name)}`}
               className={`${styles.card} ${styles[SLOT_CLASS[i]]}`}
               style={{ animationDelay: `${i * 60}ms` }}
             >
@@ -134,6 +148,17 @@ export default function Packages() {
                 fill
                 sizes="(max-width: 900px) 50vw, 30vw"
                 className={styles.cardImage}
+              />
+              <WishlistButton
+                className={styles.heartBtn}
+                item={{
+                  id: `package:${toSlug(p.name)}`,
+                  kind: "package",
+                  name: p.name,
+                  price: p.price,
+                  image: p.image,
+                  href: `/destinations/${toSlug(p.name)}`,
+                }}
               />
               <div className={styles.cardLabel}>
                 <span className={styles.cardName}>{p.name}</span>

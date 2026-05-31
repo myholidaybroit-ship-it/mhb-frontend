@@ -1,0 +1,244 @@
+.page { padding-top: 96px; background: var(--color-surface); color: var(--color-ink); min-height: 100vh; }
+.container { max-width: var(--container); margin: 0 auto; padding: clamp(32px, 5vw, 56px) clamp(20px, 5vw, 40px) clamp(56px, 8vw, 96px); }
+
+.loading {
+  padding: 80px 0;
+  text-align: center;
+  color: var(--color-ink-muted);
+  font-size: 14px;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: clamp(24px, 4vw, 40px);
+}
+@media (max-width: 700px) { .head { grid-template-columns: 1fr; align-items: start; } }
+.head > div { display: flex; flex-direction: column; gap: 10px; }
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.kicker svg { width: 14px; height: 14px; }
+
+.heading {
+  font-size: clamp(28px, 3.8vw, 44px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+.sub {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  max-width: 560px;
+  line-height: 1.55;
+}
+
+.headActions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  border: 0;
+  cursor: pointer;
+}
+.ctaGhost {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ctaGhost:hover { background: var(--color-ink); color: var(--color-surface); }
+
+/* Empty state */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: clamp(48px, 8vw, 80px) 24px;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 22px;
+  background: var(--color-surface-alt);
+}
+.emptyHeart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  margin-bottom: 6px;
+}
+.empty strong { font-size: 20px; font-weight: 900; }
+.empty p { font-size: 14px; color: var(--color-ink-muted); max-width: 420px; line-height: 1.55; }
+.emptyActions { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-ink);
+  box-shadow: 0 22px 38px -22px rgba(0,0,0,0.32);
+}
+.cardImg {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-alt);
+}
+.cardImgEl { object-fit: cover; }
+.cardImgFallback {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 900;
+  color: var(--color-ink-muted);
+}
+.removeBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.95);
+  color: var(--color-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.removeBtn:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.cardBody {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.cardKind {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.cardName {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.cardSub {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+.cardPrice {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-ink);
+  margin-top: 4px;
+}
+.cardActions {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cardCta {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-size: 12px;
+  font-weight: 800;
+}
+.cardCtaGhost {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-ink);
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 800;
+  background: transparent;
+}
+.cardCtaGhost:hover { background: var(--color-ink); color: var(--color-surface); }
+
+.upsell {
+  margin-top: clamp(28px, 4vw, 48px);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(20px, 3vw, 28px);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,222,95,0.28), transparent 55%),
+    var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+}
+@media (max-width: 700px) { .upsell { grid-template-columns: 1fr; } }
+.upsell strong { display: block; font-size: 16px; font-weight: 900; margin-bottom: 4px; }
+.upsell p { font-size: 13px; color: var(--color-ink-muted); }
+.upsellActions { display: flex; flex-wrap: wrap; gap: 10px; }

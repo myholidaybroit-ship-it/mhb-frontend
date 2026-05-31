@@ -330,6 +330,9 @@ const SLIDES = [
   ],
 ];
 
+// Flat list — used by the /moments page so it shares the same data source.
+export const MOMENTS = SLIDES.flat();
+
 const SLOT_CLASS = [
   "slot1",
   "slot2",

@@ -1,0 +1,157 @@
+.page { padding-top: 96px; background: var(--color-surface); color: var(--color-ink); min-height: 100vh; }
+.container { max-width: 1100px; margin: 0 auto; padding: clamp(28px, 5vw, 56px) clamp(20px, 5vw, 40px) clamp(56px, 8vw, 96px); }
+
+.loading {
+  padding: 64px 0;
+  text-align: center;
+  color: var(--color-ink-muted);
+  font-size: 14px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: clamp(20px, 3vw, 32px);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,222,95,0.28), transparent 55%),
+    var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  margin-bottom: clamp(24px, 4vw, 36px);
+}
+@media (max-width: 700px) {
+  .hero { grid-template-columns: auto 1fr; }
+  .logoutBtn { grid-column: 1 / -1; justify-self: start; }
+}
+.avatarLg {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 24px;
+  border: 2px solid var(--color-ink);
+}
+.heroText { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.kicker {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.heading {
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+.wave { display: inline-block; font-style: normal; }
+.sub {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+.sub strong { color: var(--color-ink); font-weight: 800; }
+
+.logoutBtn {
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.logoutBtn:hover { background: var(--color-ink); color: var(--color-surface); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+.tile, .tileLg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+.tile:hover, .tileLg:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-ink);
+  box-shadow: 0 20px 32px -22px rgba(0,0,0,0.3);
+}
+.tileLg {
+  grid-column: span 3;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,222,95,0.28), transparent 55%),
+    var(--color-surface);
+}
+@media (max-width: 900px) { .tileLg { grid-column: span 2; } }
+@media (max-width: 520px) { .tileLg { grid-column: span 1; } }
+
+.tileTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tileLabel {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.tileCount {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.tile strong, .tileLg strong {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.tile p, .tileLg p {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+.tileCta {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.card {
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px dashed var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.card strong { font-size: 16px; font-weight: 900; }
+.card p { font-size: 14px; color: var(--color-ink-muted); line-height: 1.55; }
+.inlineLink { font-weight: 800; color: var(--color-ink); border-bottom: 1.5px solid var(--color-accent); }

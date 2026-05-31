@@ -656,9 +656,9 @@ export default function Bookings() {
                         {b.nights} nights / person
                       </span>
                     </div>
-                    <button type="button" className={styles.viewBtn}>
+                    <a href="/destinations" className={styles.viewBtn}>
                       View Details
-                    </button>
+                    </a>
                   </div>
                 </div>
               </article>

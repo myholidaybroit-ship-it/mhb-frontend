@@ -1,3 +1,4 @@
+import AppProviders from "./components/AppProviders";
 import { tripSans, tripSansMono } from "./fonts";
 import "./globals.css";
 
@@ -13,7 +14,9 @@ export default function RootLayout({ children }) {
       className={`${tripSans.variable} ${tripSansMono.variable}`}
       suppressHydrationWarning
     >
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }

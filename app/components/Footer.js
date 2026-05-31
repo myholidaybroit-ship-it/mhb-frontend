@@ -8,31 +8,31 @@ const COLS = [
   {
     title: "About MyHolidayBro",
     links: [
-      { label: "About us", href: "#" },
+      { label: "About us", href: "/#why-us" },
       { label: "Careers", href: "#" },
-      { label: "Press", href: "#" },
-      { label: "Trust & Safety", href: "#" },
-      { label: "Travel Stories", href: "#" },
+      { label: "Press", href: "/#featured-on" },
+      { label: "Trust & Safety", href: "/#stories" },
+      { label: "Travel Stories", href: "/#blogs" },
     ],
   },
   {
     title: "Explore",
     links: [
-      { label: "Destinations", href: "#" },
-      { label: "Adventure Styles", href: "#" },
-      { label: "Weekend Trips", href: "#" },
-      { label: "Group Tours", href: "#" },
-      { label: "Deals & Offers", href: "#" },
+      { label: "Destinations", href: "/destinations" },
+      { label: "Adventure Styles", href: "/#travelers" },
+      { label: "Weekend Trips", href: "/#weekends" },
+      { label: "Group Tours", href: "/destinations" },
+      { label: "Deals & Offers", href: "/#bookings" },
     ],
   },
   {
     title: "Help & Policies",
     links: [
-      { label: "Help Centre", href: "#" },
-      { label: "Terms of Use", href: "#" },
-      { label: "Privacy Policy", href: "#" },
-      { label: "Cookie Policy", href: "#" },
-      { label: "Refund Policy", href: "#" },
+      { label: "Help Centre", href: "/terms#complaints" },
+      { label: "Terms of Use", href: "/terms" },
+      { label: "Privacy Policy", href: "/terms#privacy" },
+      { label: "Cookie Policy", href: "/terms#privacy" },
+      { label: "Refund Policy", href: "/terms#refunds" },
     ],
   },
 ];
@@ -189,11 +189,11 @@ export default function Footer() {
                 © 2026 MyHolidayBro. All rights reserved.
               </span>
               <div className={styles.legalLinks}>
-                <a href="#">Terms</a>
+                <a href="/terms">Terms</a>
                 <span aria-hidden>·</span>
-                <a href="#">Privacy</a>
+                <a href="/terms#privacy">Privacy</a>
                 <span aria-hidden>·</span>
-                <a href="#">Cookies</a>
+                <a href="/terms#privacy">Cookies</a>
               </div>
             </div>
           </div>

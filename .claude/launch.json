@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mhb",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "autoPort": false
+    },
+    {
+      "name": "mhb-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "3030"],
+      "port": 3030,
+      "autoPort": false
+    }
+  ]
+}

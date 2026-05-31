@@ -1,67 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
+import { WEEKEND_TRIPS } from "../data/weekends";
 import styles from "./Weekends.module.css";
-
-const W = (slug, file) =>
-  `https://static.wixstatic.com/media/${slug}/v1/fill/w_700,h_500,al_c,q_85,enc_avif,quality_auto/${file}`;
-
-const TRIPS = [
-  {
-    id: 1,
-    name: "Coorg & Chikmagalur",
-    subtitle: "Coffee country escape",
-    days: 3,
-    salePrice: "₹9,999",
-    originalPrice: "₹14,999",
-    savings: "₹5,000",
-    tag: "Weekend Trip",
-    image: W(
-      "e7beb6_a4c7c25be4b046bbab4e0000027d35d3~mv2.png",
-      "e7beb6_a4c7c25be4b046bbab4e0000027d35d3~mv2.png"
-    ),
-  },
-  {
-    id: 2,
-    name: "Ooty, Coonoor & Isha",
-    subtitle: "Hills, gardens & calm",
-    days: 3,
-    salePrice: "₹6,999",
-    originalPrice: "₹9,999",
-    savings: "₹3,000",
-    tag: "Weekend Trip",
-    image: W(
-      "e7beb6_791d93ea90f6469abfb1a0d7153a21dd~mv2.jpg",
-      "e7beb6_791d93ea90f6469abfb1a0d7153a21dd~mv2.jpg"
-    ),
-  },
-  {
-    id: 3,
-    name: "Dudhsagar Waterfalls Trek",
-    subtitle: "Adventure & jungle trails",
-    days: 3,
-    salePrice: "₹8,999",
-    originalPrice: "₹12,999",
-    savings: "₹4,000",
-    tag: "Weekend Trek",
-    image: W(
-      "e7beb6_b674dab6cfb44f669182cd846d17a146~mv2.webp",
-      "e7beb6_b674dab6cfb44f669182cd846d17a146~mv2.webp"
-    ),
-  },
-  {
-    id: 4,
-    name: "Lonavala & Matheran",
-    subtitle: "Lake camping + BBQ",
-    days: 3,
-    salePrice: "₹7,499",
-    originalPrice: "₹9,999",
-    savings: "₹2,500",
-    tag: "Weekend Trip",
-    image: W(
-      "e7beb6_008d2f6038454f38ada37c53dc9992ba~mv2.jpg",
-      "e7beb6_008d2f6038454f38ada37c53dc9992ba~mv2.jpg"
-    ),
-  },
-];
+import WishlistButton from "./WishlistButton";
 
 function ArrowIcon() {
   return (
@@ -73,19 +14,27 @@ function ArrowIcon() {
 }
 
 export default function Weekends() {
+  // Show first 4 on the home page; the full list lives on /weekends.
+  const preview = WEEKEND_TRIPS.slice(0, 4);
+
   return (
     <section className={styles.section} id="weekends">
       <div className={styles.container}>
         <header className={styles.head}>
-          <h2 className={styles.heading}>Weekend trips worth going</h2>
-          <p className={styles.sub}>
-            3-day getaways with pickup from Hyderabad. Pack a bag and go.
-          </p>
+          <div>
+            <h2 className={styles.heading}>Weekend trips worth going</h2>
+            <p className={styles.sub}>
+              3-day getaways with pickup from your city. Pack a bag and go.
+            </p>
+          </div>
+          <Link href="/weekends" className={styles.seeAll}>
+            See all weekends <ArrowIcon />
+          </Link>
         </header>
 
         <div className={styles.grid}>
-          {TRIPS.map((t) => (
-            <a key={t.id} href="#" className={styles.card}>
+          {preview.map((t) => (
+            <Link key={t.id} href="/weekends" className={styles.card}>
               <div className={styles.imageWrap}>
                 <Image
                   src={t.image}
@@ -96,6 +45,19 @@ export default function Weekends() {
                 />
                 <span className={styles.tag}>{t.tag}</span>
                 <span className={styles.savings}>Save {t.savings}</span>
+                <WishlistButton
+                  className={styles.heartBtn}
+                  item={{
+                    id: `weekend:${t.id}`,
+                    kind: "weekend",
+                    name: t.name,
+                    subtitle: t.subtitle,
+                    price: t.salePrice,
+                    image: t.image,
+                    href: "/weekends",
+                    days: t.days,
+                  }}
+                />
               </div>
               <div className={styles.body}>
                 <div className={styles.titleRow}>
@@ -115,7 +77,7 @@ export default function Weekends() {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

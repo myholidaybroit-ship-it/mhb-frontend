@@ -35,7 +35,7 @@ export default function Travelers() {
 
         <div className={styles.grid}>
           {TRAVELERS.map((t) => (
-            <a key={t.name} href="#" className={styles.card}>
+            <a key={t.name} href="/destinations" className={styles.card}>
               <div className={styles.imageWrap}>
                 <Image
                   src={t.image}

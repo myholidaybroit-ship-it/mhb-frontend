@@ -2,15 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "./AuthContext";
 import styles from "./Header.module.css";
+import { useWishlist } from "./WishlistContext";
 
 const NAV_ITEMS = [
-  { label: "Destinations", href: "#destinations" },
-  { label: "Adventure Styles", href: "#adventure-styles" },
-  { label: "Moments", href: "#moments" },
-  { label: "Deals", href: "#deals" },
-  { label: "Contact", href: "#contact" },
+  { label: "Destinations", href: "/destinations" },
+  { label: "Weekend Trips", href: "/weekends", highlight: true },
+  { label: "Adventure Styles", href: "/adventure-styles" },
+  { label: "Moments", href: "/moments" },
+  { label: "Contact", href: "/contact" },
 ];
 
 function HeartIcon() {
@@ -83,13 +86,15 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const userWrapRef = useRef(null);
   const closeTimer = useRef(null);
+  const router = useRouter();
+
+  const { user, isLoggedIn, hydrated, initial, logout } = useAuth();
+  const { count, hydrated: wlHydrated } = useWishlist();
+  const wishlistBadge = wlHydrated && count > 0 ? count : null;
 
   useEffect(() => {
     function onDocClick(e) {
-      if (
-        userWrapRef.current &&
-        !userWrapRef.current.contains(e.target)
-      ) {
+      if (userWrapRef.current && !userWrapRef.current.contains(e.target)) {
         setUserOpen(false);
       }
     }
@@ -117,6 +122,12 @@ export default function Header() {
     closeTimer.current = setTimeout(() => setUserOpen(false), 140);
   }
 
+  function handleLogout() {
+    logout();
+    setUserOpen(false);
+    router.push("/");
+  }
+
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
@@ -133,20 +144,26 @@ export default function Header() {
 
         <nav className={styles.nav} aria-label="Primary">
           {NAV_ITEMS.map((item) => (
-            <a key={item.label} href={item.href} className={styles.navLink}>
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`${styles.navLink} ${item.highlight ? styles.navLinkHl : ""}`}
+            >
               {item.label}
-            </a>
+              {item.highlight && <span className={styles.navDot} aria-hidden />}
+            </Link>
           ))}
         </nav>
 
         <div className={styles.actions}>
-          <button
-            type="button"
+          <Link
+            href="/wishlist"
             className={styles.iconBtn}
-            aria-label="Wishlist"
+            aria-label={wishlistBadge ? `Wishlist (${count} items)` : "Wishlist"}
           >
             <HeartIcon />
-          </button>
+            {wishlistBadge && <span className={styles.iconBadge}>{wishlistBadge}</span>}
+          </Link>
 
           <div
             ref={userWrapRef}
@@ -156,31 +173,57 @@ export default function Header() {
           >
             <button
               type="button"
-              className={styles.iconBtn}
-              aria-label="Account"
+              className={`${styles.iconBtn} ${isLoggedIn ? styles.avatarBtn : ""}`}
+              aria-label={isLoggedIn ? `Account · ${user?.name || ""}` : "Account"}
               aria-haspopup="menu"
               aria-expanded={userOpen}
               onClick={() => setUserOpen((v) => !v)}
             >
-              <UserIcon />
+              {hydrated && isLoggedIn ? (
+                <span className={styles.avatar}>{initial}</span>
+              ) : (
+                <UserIcon />
+              )}
             </button>
 
             {userOpen && (
               <div className={styles.dropdown} role="menu">
-                <div className={styles.dropdownHead}>
-                  <span className={styles.dropdownTitle}>Welcome</span>
-                  <span className={styles.dropdownSub}>
-                    Sign in to plan your next trip
-                  </span>
-                </div>
-                <div className={styles.dropdownActions}>
-                  <button className={styles.btnPrimary} type="button">
-                    Login
-                  </button>
-                  <button className={styles.btnOutline} type="button">
-                    Sign up
-                  </button>
-                </div>
+                {hydrated && isLoggedIn ? (
+                  <>
+                    <div className={styles.dropdownHead}>
+                      <span className={styles.dropdownTitle}>Hey, {user.name.split(" ")[0]}</span>
+                      <span className={styles.dropdownSub}>{user.email}</span>
+                    </div>
+                    <div className={styles.dropdownActions}>
+                      <Link href="/account" className={styles.btnOutline} onClick={() => setUserOpen(false)}>
+                        Your account
+                      </Link>
+                      <Link href="/wishlist" className={styles.btnOutline} onClick={() => setUserOpen(false)}>
+                        Wishlist {count > 0 && `(${count})`}
+                      </Link>
+                      <button className={styles.btnPrimary} type="button" onClick={handleLogout}>
+                        Log out
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.dropdownHead}>
+                      <span className={styles.dropdownTitle}>Welcome</span>
+                      <span className={styles.dropdownSub}>
+                        Sign in to save trips & manage bookings
+                      </span>
+                    </div>
+                    <div className={styles.dropdownActions}>
+                      <Link href="/login" className={styles.btnPrimary} onClick={() => setUserOpen(false)}>
+                        Login
+                      </Link>
+                      <Link href="/signup" className={styles.btnOutline} onClick={() => setUserOpen(false)}>
+                        Sign up
+                      </Link>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -201,15 +244,42 @@ export default function Header() {
         <div className={styles.mobilePanel}>
           <nav className={styles.mobileNav} aria-label="Mobile">
             {NAV_ITEMS.map((item) => (
-              <a
+              <Link
                 key={item.label}
                 href={item.href}
-                className={styles.mobileLink}
+                className={`${styles.mobileLink} ${item.highlight ? styles.mobileLinkHl : ""}`}
                 onClick={() => setMobileOpen(false)}
               >
                 {item.label}
-              </a>
+                {item.highlight && <span className={styles.navDot} aria-hidden />}
+              </Link>
             ))}
+            <Link
+              href="/wishlist"
+              className={styles.mobileLink}
+              onClick={() => setMobileOpen(false)}
+            >
+              Wishlist {count > 0 && `(${count})`}
+            </Link>
+            {hydrated && isLoggedIn ? (
+              <>
+                <Link href="/account" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>
+                  Your account
+                </Link>
+                <button type="button" className={styles.mobileLink} onClick={() => { handleLogout(); setMobileOpen(false); }}>
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>
+                  Login
+                </Link>
+                <Link href="/signup" className={styles.mobileLink} onClick={() => setMobileOpen(false)}>
+                  Sign up
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}

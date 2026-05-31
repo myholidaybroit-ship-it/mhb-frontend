@@ -1,0 +1,206 @@
+.page {
+  padding-top: 96px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  min-height: 100vh;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  min-height: calc(100vh - 96px);
+}
+@media (max-width: 900px) { .shell { grid-template-columns: 1fr; } }
+
+.formSide {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(28px, 5vw, 72px) clamp(20px, 6vw, 80px);
+  max-width: 560px;
+  margin: 0 auto;
+  width: 100%;
+  justify-content: center;
+}
+
+.backLink {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+  margin-bottom: 8px;
+  width: fit-content;
+}
+.backLink:hover { color: var(--color-ink); }
+
+.kicker {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.heading {
+  font-size: clamp(28px, 3.8vw, 44px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+.headingAccent { position: relative; display: inline-block; padding: 0 6px; }
+.headingAccent::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 6% 0;
+  height: 34%;
+  background: var(--color-accent);
+  z-index: -1;
+  transform: rotate(-1deg);
+}
+
+.sub {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  max-width: 480px;
+  line-height: 1.55;
+}
+
+.form {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.field input {
+  padding: 14px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-alt);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink);
+  transition: border-color 0.15s, background 0.15s;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--color-ink);
+  background: var(--color-surface);
+}
+.hint {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink-muted);
+}
+
+.error {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff1f1;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.submit {
+  margin-top: 4px;
+  padding: 14px 22px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+.submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px -14px rgba(0,0,0,0.4);
+}
+.submit:disabled { opacity: 0.6; cursor: progress; }
+
+.altLine {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+.altLink {
+  font-weight: 800;
+  color: var(--color-ink);
+  border-bottom: 1.5px solid var(--color-accent);
+}
+
+/* Visual side */
+.visualSide {
+  position: relative;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255, 222, 95, 0.22), transparent 55%),
+    radial-gradient(circle at 10% 95%, rgba(186, 230, 253, 0.18), transparent 55%),
+    var(--color-surface-alt);
+  border-left: 1px solid var(--color-border);
+  padding: clamp(40px, 6vw, 80px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  min-height: 320px;
+}
+@media (max-width: 900px) {
+  .visualSide { border-left: 0; border-top: 1px solid var(--color-border); }
+}
+
+.visualOverlay { display: none; }
+.visualText {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 520px;
+}
+.visualKicker {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.visualText h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.25;
+  color: var(--color-ink);
+}
+.visualText h2 span {
+  font-style: italic;
+  background: var(--color-accent);
+  padding: 0 4px;
+}
+.visualWho {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+}

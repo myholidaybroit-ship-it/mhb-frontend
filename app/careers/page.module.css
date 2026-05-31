@@ -1,0 +1,176 @@
+.page { padding-top: 96px; background: var(--color-surface); color: var(--color-ink); }
+.container { max-width: 1000px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 40px); }
+
+.kicker {
+  display: inline-flex;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.headingAccent { position: relative; display: inline-block; padding: 0 6px; }
+.headingAccent::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 6% 0;
+  height: 34%;
+  background: var(--color-accent);
+  z-index: -1;
+  transform: rotate(-1deg);
+}
+
+/* Hero */
+.heroWrap {
+  padding: clamp(48px, 7vw, 80px) 0;
+  background:
+    radial-gradient(circle at 90% 18%, rgba(255, 222, 95, 0.25), transparent 55%),
+    var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+.heading {
+  margin-top: 14px;
+  font-size: clamp(32px, 4.6vw, 56px);
+  font-weight: 900;
+  letter-spacing: -0.028em;
+  line-height: 1.05;
+}
+.sub {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  max-width: 620px;
+  line-height: 1.55;
+}
+
+/* Perks */
+.perksWrap { padding: clamp(40px, 6vw, 64px) 0 clamp(24px, 4vw, 40px); }
+.perksGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+@media (max-width: 900px) { .perksGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .perksGrid { grid-template-columns: 1fr; } }
+.perkCard {
+  padding: 18px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.perkCard strong {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.perkCard p {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  line-height: 1.45;
+}
+
+/* Roles */
+.rolesWrap { padding: clamp(24px, 4vw, 40px) 0 clamp(56px, 8vw, 96px); }
+.sectionHeading {
+  margin-top: 12px;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.roleList {
+  margin-top: clamp(20px, 3vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.roleCard {
+  display: block;
+  padding: clamp(18px, 2.4vw, 24px);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-surface);
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+.roleCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-ink);
+  box-shadow: 0 22px 36px -22px rgba(0,0,0,0.3);
+}
+.roleHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.roleTeam {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background: var(--color-accent);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+.roleType {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+}
+.roleTitle {
+  display: block;
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.roleBlurb {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+  line-height: 1.55;
+}
+.roleCta {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.fallback {
+  margin-top: clamp(36px, 5vw, 56px);
+  padding: clamp(22px, 3vw, 32px);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(186, 230, 253, 0.4), transparent 55%),
+    var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.fallback strong { font-size: 17px; font-weight: 900; }
+.fallback p { font-size: 14px; color: var(--color-ink-muted); line-height: 1.55; }
+.fallback a { font-weight: 800; color: var(--color-ink); border-bottom: 1.5px solid var(--color-accent); }
+.fallbackCta {
+  margin-top: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-weight: 800;
+  font-size: 13px;
+}

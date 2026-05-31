@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import styles from "./Hero.module.css";
 
 const HERO_VIDEO =
@@ -15,6 +17,15 @@ function SearchIcon() {
 }
 
 export default function Hero() {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  function submit(e) {
+    e.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/destinations?where=${encodeURIComponent(q)}` : "/destinations");
+  }
+
   return (
     <section className={styles.hero}>
       <video
@@ -42,7 +53,7 @@ export default function Hero() {
 
         <form
           className={styles.searchBar}
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={submit}
           role="search"
           aria-label="Search trips"
         >
@@ -55,6 +66,8 @@ export default function Hero() {
             placeholder="Where do you want to go?"
             autoComplete="off"
             aria-label="Search trips and destinations"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
           <button type="submit" className={styles.searchBtn}>
             Search
