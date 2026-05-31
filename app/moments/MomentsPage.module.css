@@ -204,14 +204,49 @@
   max-width: 520px;
   line-height: 1.55;
 }
+.videoRail {
+  position: relative;
+}
 .videoScroller {
   display: flex;
   gap: 18px;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  padding: 8px 4px 28px;
-  margin: 0 -4px;
+  /* Give the scroller enough vertical headroom that the hover-lift + scale
+     never gets clipped (which was making the top of cards look squared). */
+  padding: 24px 4px 32px;
+  margin: -16px -4px 0;
+}
+.railArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.35);
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.railArrow:hover {
+  background: var(--color-ink);
+  color: var(--color-surface);
+  transform: translateY(-50%) scale(1.05);
+}
+.railArrowLeft  { left: -18px; }
+.railArrowRight { right: -18px; }
+@media (max-width: 700px) {
+  .railArrowLeft  { left: 4px; }
+  .railArrowRight { right: 4px; }
 }
 .videoScroller::-webkit-scrollbar { display: none; }
 .videoCard {

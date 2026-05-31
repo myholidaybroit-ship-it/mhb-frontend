@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useWishlist } from "../components/WishlistContext";
 import { DESTINATION_LIST, img } from "../data/destinations";
 import styles from "./DestinationsList.module.css";
 
@@ -317,7 +318,13 @@ export default function DestinationsList() {
   const [maxDays, setMaxDays] = useState(15);
   const [maxPrice, setMaxPrice] = useState(150000);
   const [sort, setSort] = useState("popular");
-  const [wishlist, setWishlist] = useState(() => new Set());
+  const { has: wishlistHas, toggle: wishlistToggle, hydrated: wishlistHydrated } = useWishlist();
+  // Defer all interactive rendering until after client mount. This sidesteps an
+  // SSR/client mismatch in the date pickers (new Date() crosses a month boundary)
+  // that was bailing the entire tree out of hydration and leaving every button
+  // (including the wishlist heart) dead.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const today = useMemo(() => {
     const d = new Date();
@@ -406,11 +413,16 @@ export default function DestinationsList() {
     );
   }
 
-  function toggleWish(slug) {
-    setWishlist((prev) => {
-      const next = new Set(prev);
-      next.has(slug) ? next.delete(slug) : next.add(slug);
-      return next;
+  function toggleWish(d) {
+    const pkg = d.packages?.[0];
+    wishlistToggle({
+      id: `destination:${d.slug}`,
+      kind: "destination",
+      name: d.name,
+      subtitle: d.country,
+      price: pkg?.price,
+      image: img(d.imageKey, 600, 600),
+      href: `/destinations/${d.slug}`,
     });
   }
 
@@ -503,6 +515,10 @@ export default function DestinationsList() {
       onClear: () => setWhere(""),
     },
   ].filter(Boolean);
+
+  if (!mounted) {
+    return <main className={styles.page} aria-busy />;
+  }
 
   return (
     <main className={styles.page}>
@@ -922,7 +938,6 @@ export default function DestinationsList() {
                       }
                     >
                       {MONTHS_SHORT[m.month]}
-                      <small>{String(m.year).slice(2)}</small>
                     </button>
                   );
                 })}
@@ -987,7 +1002,7 @@ export default function DestinationsList() {
             ) : (
               <div className={styles.resultList}>
                 {filtered.slice(0, visibleCount).map((d, i) => {
-                  const wished = wishlist.has(d.slug);
+                  const wished = wishlistHydrated && wishlistHas(`destination:${d.slug}`);
                   const badge = badgeFor(d, i);
                   const pkg = d.packages[0];
                   const discount =
@@ -1053,7 +1068,7 @@ export default function DestinationsList() {
                           className={`${styles.resultWish} ${
                             wished ? styles.resultWishOn : ""
                           }`}
-                          onClick={() => toggleWish(d.slug)}
+                          onClick={() => toggleWish(d)}
                           aria-label={
                             wished
                               ? "Remove from wishlist"

@@ -204,3 +204,46 @@
   font-weight: 700;
   color: var(--color-ink-muted);
 }
+
+/* ───── Visual side collage ───── */
+.visualCollage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 8px;
+  padding: 8px;
+}
+.visualTile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--color-surface-alt);
+  box-shadow: 0 10px 20px -16px rgba(0,0,0,0.35);
+}
+.visualTileImg { object-fit: cover; transition: transform 4s ease; }
+.visualTile:hover .visualTileImg { transform: scale(1.06); }
+
+/* Bento spans — 6 tiles for an editorial feel */
+.visualTile1 { grid-column: span 2; grid-row: span 2; }
+.visualTile2 { grid-column: span 1; grid-row: span 2; }
+.visualTile3 { grid-column: span 1; grid-row: span 1; }
+.visualTile4 { grid-column: span 1; grid-row: span 1; }
+.visualTile5 { grid-column: span 1; grid-row: span 2; }
+.visualTile6 { grid-column: span 2; grid-row: span 1; }
+
+.visualTileLabel {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-ink);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}

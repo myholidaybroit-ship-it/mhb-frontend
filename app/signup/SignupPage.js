@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAuth } from "../components/AuthContext";
+import AuthVisual from "../components/AuthVisual";
 import styles from "../components/AuthShell.module.css";
 
 function SignupInner() {
@@ -39,13 +40,7 @@ function SignupInner() {
       <div className={styles.shell}>
         <div className={styles.formSide}>
           <Link href="/" className={styles.backLink}>← Back to MHB</Link>
-          <span className={styles.kicker}>Create your account</span>
-          <h1 className={styles.heading}>
-            Join <span className={styles.headingAccent}>MyHolidayBro</span>.
-          </h1>
-          <p className={styles.sub}>
-            Save trips to a wishlist, get insider newsletter drops, and reach a trip captain in one tap.
-          </p>
+          <h1 className={styles.heading}>Sign up</h1>
 
           <form className={styles.form} onSubmit={onSubmit} noValidate>
             <label className={styles.field}>
@@ -96,16 +91,8 @@ function SignupInner() {
           </p>
         </div>
 
-        <aside className={styles.visualSide} aria-hidden>
-          <div className={styles.visualOverlay} />
-          <div className={styles.visualText}>
-            <span className={styles.visualKicker}>Why sign up?</span>
-            <h2>
-              Save trips to your <span>wishlist</span>, get a single-click reply on WhatsApp.
-            </h2>
-            <span className={styles.visualWho}>It's free. Always will be.</span>
-          </div>
-        </aside>
+        <AuthVisual />
+
       </div>
     </main>
   );

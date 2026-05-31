@@ -34,7 +34,7 @@ export default function Weekends() {
 
         <div className={styles.grid}>
           {preview.map((t) => (
-            <Link key={t.id} href="/weekends" className={styles.card}>
+            <Link key={t.id} href={`/weekends/${t.id}`} className={styles.card}>
               <div className={styles.imageWrap}>
                 <Image
                   src={t.image}

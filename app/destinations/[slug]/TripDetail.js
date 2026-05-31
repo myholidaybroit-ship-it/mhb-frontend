@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useWishlist } from "../../components/WishlistContext";
 import {
   AGE_LIMIT,
   DESTINATION_LIST,
@@ -393,7 +394,21 @@ export default function TripDetail({ dest }) {
   const [kids, setKids] = useState(0);
   const [openDay, setOpenDay] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
-  const [wished, setWished] = useState(false);
+  const { has: wishlistHas, toggle: wishlistToggle, hydrated: wishlistHydrated } = useWishlist();
+  const wishlistId = `destination:${dest.slug}`;
+  const wished = wishlistHydrated && wishlistHas(wishlistId);
+  function toggleWished() {
+    const pkg = dest.packages?.[0];
+    wishlistToggle({
+      id: wishlistId,
+      kind: "destination",
+      name: dest.name,
+      subtitle: dest.country,
+      price: pkg?.price,
+      image: img(dest.imageKey, 600, 600),
+      href: `/destinations/${dest.slug}`,
+    });
+  }
 
   // Enquiry form state
   const [name, setName] = useState("");
@@ -683,7 +698,7 @@ export default function TripDetail({ dest }) {
               <button
                 type="button"
                 className={`${styles.iconBtn} ${wished ? styles.iconBtnOn : ""}`}
-                onClick={() => setWished((w) => !w)}
+                onClick={toggleWished}
                 aria-pressed={wished}
                 aria-label="Save to wishlist"
               >

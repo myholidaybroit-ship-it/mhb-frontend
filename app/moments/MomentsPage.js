@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MOMENTS } from "../components/Moments";
 import styles from "./MomentsPage.module.css";
 
@@ -144,6 +144,13 @@ const HERO_STRIP = MOMENTS.slice(0, 12);
 export default function MomentsPage() {
   const [active, setActive] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
+  const videoScrollerRef = useRef(null);
+
+  function scrollVideos(dir) {
+    const el = videoScrollerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth * 0.7), behavior: "smooth" });
+  }
 
   /* ─── Photo lightbox: keyboard + scroll lock ─── */
   const close = useCallback(() => setActive(null), []);
@@ -236,7 +243,24 @@ export default function MomentsPage() {
             </p>
           </div>
 
-          <div className={styles.videoScroller}>
+          <div className={styles.videoRail}>
+            <button
+              type="button"
+              className={`${styles.railArrow} ${styles.railArrowLeft}`}
+              onClick={() => scrollVideos(-1)}
+              aria-label="Scroll videos left"
+            >
+              {I.arrowL(18)}
+            </button>
+            <button
+              type="button"
+              className={`${styles.railArrow} ${styles.railArrowRight}`}
+              onClick={() => scrollVideos(1)}
+              aria-label="Scroll videos right"
+            >
+              {I.arrowR(18)}
+            </button>
+            <div className={styles.videoScroller} ref={videoScrollerRef}>
             {TESTIMONIAL_VIDEOS.map((v, i) => (
               <button
                 key={v.id}
@@ -268,6 +292,7 @@ export default function MomentsPage() {
                 </div>
               </button>
             ))}
+            </div>
           </div>
         </div>
       </section>

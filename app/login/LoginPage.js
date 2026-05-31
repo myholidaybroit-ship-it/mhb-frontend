@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useAuth } from "../components/AuthContext";
+import AuthVisual from "../components/AuthVisual";
 import styles from "../components/AuthShell.module.css";
 
 function LoginInner() {
@@ -36,13 +37,7 @@ function LoginInner() {
       <div className={styles.shell}>
         <div className={styles.formSide}>
           <Link href="/" className={styles.backLink}>← Back to MHB</Link>
-          <span className={styles.kicker}>Welcome back</span>
-          <h1 className={styles.heading}>
-            Log in to <span className={styles.headingAccent}>MyHolidayBro</span>.
-          </h1>
-          <p className={styles.sub}>
-            Pick up your wishlist, manage upcoming trips, and check on past holidays.
-          </p>
+          <h1 className={styles.heading}>Log in</h1>
 
           <form className={styles.form} onSubmit={onSubmit} noValidate>
             <label className={styles.field}>
@@ -81,16 +76,8 @@ function LoginInner() {
           </p>
         </div>
 
-        <aside className={styles.visualSide} aria-hidden>
-          <div className={styles.visualOverlay} />
-          <div className={styles.visualText}>
-            <span className={styles.visualKicker}>Trusted by 1,000+ travellers</span>
-            <h2>
-              "MHB had us in <span>Bali by Thursday</span> — we WhatsApp'd them Tuesday morning."
-            </h2>
-            <span className={styles.visualWho}>Hari · Mumbai · Bali, Feb 2026</span>
-          </div>
-        </aside>
+        <AuthVisual />
+
       </div>
     </main>
   );

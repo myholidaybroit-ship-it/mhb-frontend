@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { WEEKEND_TRIPS } from "../data/weekends";
+import WishlistButton from "../components/WishlistButton";
 import styles from "./WeekendsPage.module.css";
 
 function ArrowIcon() {
@@ -64,7 +66,7 @@ export default function WeekendsPage() {
         <div className={styles.container}>
           <div className={styles.grid}>
             {WEEKEND_TRIPS.map((t) => (
-              <a key={t.id} href="#" className={styles.card}>
+              <Link key={t.id} href={`/weekends/${t.id}`} className={styles.card}>
                 <div className={styles.imageWrap}>
                   <Image
                     src={t.image}
@@ -74,6 +76,19 @@ export default function WeekendsPage() {
                     className={styles.image}
                   />
                   <span className={styles.savings}>Save {t.savings}</span>
+                  <WishlistButton
+                    className={styles.heartBtn}
+                    item={{
+                      id: `weekend:${t.id}`,
+                      kind: "weekend",
+                      name: t.name,
+                      subtitle: t.subtitle,
+                      price: t.salePrice,
+                      image: t.image,
+                      href: "/weekends",
+                      days: t.days,
+                    }}
+                  />
                 </div>
                 <div className={styles.body}>
                   <h3 className={styles.title}>{t.name}</h3>
@@ -89,7 +104,7 @@ export default function WeekendsPage() {
                     </span>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
