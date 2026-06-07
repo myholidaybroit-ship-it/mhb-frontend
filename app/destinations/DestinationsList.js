@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWishlist } from "../components/WishlistContext";
-import { DESTINATION_LIST, img } from "../data/destinations";
+import { img } from "../lib/img";
 import styles from "./DestinationsList.module.css";
 
 /* ─────── Icons (inline) ─────── */
@@ -137,28 +137,6 @@ const SORTS = [
 ];
 
 /* ─── Static marketing content for the bottom bands ─── */
-
-const TRAVELLER_PORTRAITS = [
-  { name: "Aishwarya", trip: "Bali Holiday", tag: "Bali", imageKey: "bali" },
-  { name: "Harish", trip: "Thailand Holiday", tag: "Thailand", imageKey: "thailand" },
-  { name: "Priyadarshini", trip: "Singapore Holiday", tag: "Singapore", imageKey: "singapore" },
-  { name: "Mahesh", trip: "Europe Holiday", tag: "Europe", imageKey: "himachal" },
-  { name: "Snehal", trip: "Maldives Holiday", tag: "Maldives", imageKey: "maldives" },
-  { name: "Rohan", trip: "Dubai Holiday", tag: "Dubai", imageKey: "dubai" },
-  { name: "Aanya", trip: "Vietnam Holiday", tag: "Vietnam", imageKey: "vietnam" },
-  { name: "Priya", trip: "Kerala Holiday", tag: "Kerala", imageKey: "malaysia" },
-];
-
-// Order matters — grid uses `auto-flow: column` so this fills col-by-col.
-const TRAVELLER_STORIES = [
-  { author: "Shiv", duration: "6 Day", trip: "Singapore family escape", imageKey: "singapore", tall: true },
-  { author: "Abi", duration: "5 Night", trip: "Couple in Bali", imageKey: "bali" },
-  { author: "Priya", duration: "6 Day", trip: "Vietnam exploration", imageKey: "vietnam", video: true },
-  { author: "Hari", duration: "7 Day", trip: "Bali deep dive", imageKey: "thailand", tall: true, video: true },
-  { author: "Arjun", duration: "5 Night", trip: "Honeymoon special", imageKey: "maldives" },
-  { author: "Neha", duration: "8 Day", trip: "Singapore family", imageKey: "northeast", video: true },
-  { author: "Rohan", duration: "5 Day", trip: "Dubai solo trip", imageKey: "dubai", tall: true },
-];
 
 /* ─────── Helpers ─────── */
 
@@ -296,7 +274,10 @@ function CheckRow({ type, name, checked, onChange, label, count }) {
 
 /* ─────── Component ─────── */
 
-export default function DestinationsList() {
+export default function DestinationsList({ destinations }) {
+  // Live list from the API (passed by the server page); falls back to the
+  // bundled data if the API returned nothing.
+  const LIST = destinations || [];
   // Headline search state — seed from ?where= so the home hero can deep-link.
   const searchParams = useSearchParams();
   const [where, setWhere] = useState(() => searchParams?.get("where") || "");
@@ -401,8 +382,8 @@ export default function DestinationsList() {
 
   const dropdownFiltered = useMemo(() => {
     const q = dropdownQuery.trim().toLowerCase();
-    if (!q) return DESTINATION_LIST;
-    return DESTINATION_LIST.filter((d) =>
+    if (!q) return LIST;
+    return LIST.filter((d) =>
       `${d.name} ${d.country} ${d.tagline} ${d.region}`.toLowerCase().includes(q)
     );
   }, [dropdownQuery]);
@@ -444,7 +425,7 @@ export default function DestinationsList() {
 
   const filtered = useMemo(() => {
     const q = where.trim().toLowerCase();
-    let list = DESTINATION_LIST.filter((d) => {
+    let list = LIST.filter((d) => {
       if (q && !`${d.name} ${d.country} ${d.tagline}`.toLowerCase().includes(q))
         return false;
       if (region !== "All regions" && d.region !== region) return false;
@@ -586,7 +567,7 @@ export default function DestinationsList() {
                     <span>
                       <strong>Any destination</strong>
                       <span className={styles.dropdownAnySub}>
-                        Browse all {DESTINATION_LIST.length} trips
+                        Browse all {LIST.length} trips
                       </span>
                     </span>
                     <span className={styles.dropdownRegion}>

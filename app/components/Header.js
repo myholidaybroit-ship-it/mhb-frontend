@@ -7,14 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./AuthContext";
 import styles from "./Header.module.css";
 import { useWishlist } from "./WishlistContext";
-
-const NAV_ITEMS = [
-  { label: "Destinations", href: "/destinations" },
-  { label: "Weekend Trips", href: "/weekends", highlight: true },
-  { label: "Adventure Styles", href: "/adventure-styles" },
-  { label: "Moments", href: "/moments" },
-  { label: "Contact", href: "/contact" },
-];
+import { content } from "../lib/api";
 
 function HeartIcon() {
   return (
@@ -92,6 +85,14 @@ export default function Header() {
   const { count, hydrated: wlHydrated } = useWishlist();
   const wishlistBadge = wlHydrated && count > 0 ? count : null;
 
+  // Nav + logo from the CMS (admin-editable), falling back to the defaults.
+  const [nav, setNav] = useState(null);
+  useEffect(() => {
+    content.section("nav").then((r) => r?.data && setNav(r.data)).catch(() => {});
+  }, []);
+  const navItems = nav?.items || [];
+  const logoSrc = nav?.logoBlack;
+
   useEffect(() => {
     function onDocClick(e) {
       if (userWrapRef.current && !userWrapRef.current.contains(e.target)) {
@@ -132,18 +133,20 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href="/" className={styles.logo} aria-label="MyHolidayBro home">
-          <Image
-            src="https://res.cloudinary.com/dyxxkrq8r/image/upload/v1779211833/MHB_Logo_Black_bdpszg.avif"
-            alt="MyHolidayBro"
-            width={260}
-            height={60}
-            priority
-            className={styles.logoImg}
-          />
+          {logoSrc && (
+            <Image
+              src={logoSrc}
+              alt="MyHolidayBro"
+              width={260}
+              height={60}
+              priority
+              className={styles.logoImg}
+            />
+          )}
         </Link>
 
         <nav className={styles.nav} aria-label="Primary">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -243,7 +246,7 @@ export default function Header() {
       {mobileOpen && (
         <div className={styles.mobilePanel}>
           <nav className={styles.mobileNav} aria-label="Mobile">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}

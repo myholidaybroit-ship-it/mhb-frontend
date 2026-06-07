@@ -247,3 +247,70 @@
   text-transform: uppercase;
   backdrop-filter: blur(6px);
 }
+
+/* ───── Demo credentials box ───── */
+.demoBox {
+  margin-top: 24px;
+  padding: 16px 18px;
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  background: var(--color-accent-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.demoHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.demoHead strong {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+.demoFill {
+  padding: 6px 12px;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.demoFill:hover { background: var(--color-ink); color: var(--color-surface); }
+
+.demoList {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+}
+.demoList > div { display: contents; }
+.demoList dt {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.demoList dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.demoList code {
+  font-family: var(--font-trip-sans-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: rgba(255,255,255,0.7);
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.06);
+}

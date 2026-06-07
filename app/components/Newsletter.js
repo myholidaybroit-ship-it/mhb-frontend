@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import styles from "./Newsletter.module.css";
-
-const HERO_IMAGE =
-  "https://static.wixstatic.com/media/nsplsh_657846644f576b59425177~mv2.jpg/v1/fill/w_1200,h_1200,al_c,q_85,enc_avif,quality_auto/nsplsh_657846644f576b59425177~mv2.jpg";
+import { forms } from "../lib/api";
 
 function ArrowIcon() {
   return (
@@ -16,14 +14,19 @@ function ArrowIcon() {
   );
 }
 
-export default function Newsletter() {
+export default function Newsletter({ data }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
 
+  const bg = data?.backgroundImage;
+  const eyebrow = data?.eyebrow || "Join the crew";
+  const sub = data?.subheading || "The best deals, hidden gems, and travel hacks — twice a month, hand-picked by our team. Never spammy.";
+
   function onSubmit(e) {
     e.preventDefault();
     if (!email.trim()) return;
+    forms.subscribe(email, "newsletter-section").catch((err) => console.error("Subscribe failed:", err.message));
     setDone(true);
   }
 
@@ -32,29 +35,41 @@ export default function Newsletter() {
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.imageWrap}>
-            <Image
-              src={HERO_IMAGE}
-              alt=""
-              fill
-              sizes="(max-width: 900px) 100vw, 50vw"
-              className={styles.image}
-            />
+            {bg && (
+              <Image
+                src={bg}
+                alt=""
+                fill
+                sizes="(max-width: 900px) 100vw, 50vw"
+                className={styles.image}
+              />
+            )}
           </div>
 
           <div className={styles.content}>
-            <span className={styles.eyebrow}>Join the crew</span>
+            <span className={styles.eyebrow}>{eyebrow}</span>
             <h2 className={styles.heading}>
-              Trip ideas, in your{" "}
-              <span className={styles.headingAccent}>inbox</span>.
+              {data?.heading ? (
+                data.heading
+              ) : (
+                <>
+                  Trip ideas, in your{" "}
+                  <span className={styles.headingAccent}>inbox</span>.
+                </>
+              )}
             </h2>
-            <p className={styles.sub}>
-              The best deals, hidden gems, and travel hacks — twice a month,
-              hand-picked by our team. Never spammy.
-            </p>
+            <p className={styles.sub}>{sub}</p>
 
             {done ? (
               <div className={styles.success}>
-                You&apos;re in. Keep an eye on your inbox <span aria-hidden>📬</span>
+                {data?.successMessage ? (
+                  data.successMessage
+                ) : (
+                  <>
+                    You&apos;re in. Keep an eye on your inbox{" "}
+                    <span aria-hidden>📬</span>
+                  </>
+                )}
               </div>
             ) : (
               <form className={styles.form} onSubmit={onSubmit} noValidate>
@@ -84,14 +99,14 @@ export default function Newsletter() {
                   </label>
                 </div>
                 <button type="submit" className={styles.button}>
-                  Subscribe
+                  {data?.buttonLabel || "Subscribe"}
                   <ArrowIcon />
                 </button>
               </form>
             )}
 
             <span className={styles.note}>
-              No spam. Unsubscribe anytime.
+              {data?.footnote || "No spam. Unsubscribe anytime."}
             </span>
           </div>
         </div>

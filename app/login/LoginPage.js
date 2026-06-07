@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { useAuth } from "../components/AuthContext";
+import { DEMO_CREDENTIALS, useAuth } from "../components/AuthContext";
 import AuthVisual from "../components/AuthVisual";
 import styles from "../components/AuthShell.module.css";
 
@@ -22,11 +22,11 @@ function LoginInner() {
     if (hydrated && isLoggedIn) router.replace(next);
   }, [hydrated, isLoggedIn, next, router]);
 
-  function onSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    const res = login({ email, password });
+    const res = await login({ email, password });
     setSubmitting(false);
     if (!res.ok) setError(res.error);
     else router.push(next);
@@ -74,6 +74,32 @@ function LoginInner() {
               Create an account
             </Link>
           </p>
+
+          <div className={styles.demoBox}>
+            <div className={styles.demoHead}>
+              <strong>Try with the demo account</strong>
+              <button
+                type="button"
+                className={styles.demoFill}
+                onClick={() => {
+                  setEmail(DEMO_CREDENTIALS.email);
+                  setPassword(DEMO_CREDENTIALS.password);
+                }}
+              >
+                Fill demo creds
+              </button>
+            </div>
+            <dl className={styles.demoList}>
+              <div>
+                <dt>Email</dt>
+                <dd><code>{DEMO_CREDENTIALS.email}</code></dd>
+              </div>
+              <div>
+                <dt>Password</dt>
+                <dd><code>{DEMO_CREDENTIALS.password}</code></dd>
+              </div>
+            </dl>
+          </div>
         </div>
 
         <AuthVisual />

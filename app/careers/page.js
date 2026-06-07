@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { getContent } from "../lib/server";
 import styles from "./page.module.css";
 
 export const metadata = {
@@ -9,52 +10,13 @@ export const metadata = {
     "Build the holiday company you wish existed. Open roles at MyHolidayBro across design, ops, engineering and travel curation.",
 };
 
-const ROLES = [
-  {
-    team: "Trip Design",
-    title: "Trip Captain · International",
-    type: "Full-time · Hyderabad",
-    blurb:
-      "Curate international itineraries end-to-end — from first WhatsApp ping to landing back home. 2+ years in travel; obsessive about details.",
-  },
-  {
-    team: "Trip Design",
-    title: "Trip Captain · Domestic & Weekends",
-    type: "Full-time · Hyderabad / Bangalore",
-    blurb:
-      "Own the domestic and weekend desk. You know your Coorgs from your Chikmagalurs and can plan a long-weekend in 12 minutes flat.",
-  },
-  {
-    team: "Engineering",
-    title: "Frontend Engineer (Next.js)",
-    type: "Full-time · Remote-friendly",
-    blurb:
-      "Help us build a delightful booking experience. Next.js, React, CSS Modules. Bonus: you've shipped travel or marketplace UI.",
-  },
-  {
-    team: "Ops",
-    title: "On-trip Support Lead",
-    type: "Full-time · Hyderabad",
-    blurb:
-      "Run the 24×7 traveller support pod. Calm under pressure, fluent across WhatsApp and ground-handler phone trees.",
-  },
-  {
-    team: "Brand",
-    title: "Content & Social Designer",
-    type: "Contract / Full-time · Hyderabad",
-    blurb:
-      "Shoot, edit, ship — reels, photo edits, the occasional newsletter cover. A portfolio that doesn't scream stock-template.",
-  },
-];
-
-const PERKS = [
-  { t: "Real travel benefits", d: "Annual offsite trip + discounted MHB packages for you & your family." },
-  { t: "Health cover", d: "Comprehensive medical insurance for you, your spouse and kids." },
-  { t: "Hybrid by default", d: "Three days from the studio, two from wherever you concentrate best." },
-  { t: "Learning budget", d: "₹50k/year for courses, conferences, books — no approvals needed." },
-];
-
-export default function Page() {
+export default async function Page() {
+  const c = (await getContent("careers")) || {};
+  const hero = c.hero || {};
+  const roles = c.roles || [];
+  const perks = c.perks || [];
+  const email = c.email || "careers@myholidaybro.com";
+  const fallback = c.fallback || {};
   return (
     <>
       <Header />
@@ -62,14 +24,13 @@ export default function Page() {
         {/* Hero */}
         <section className={styles.heroWrap}>
           <div className={styles.container}>
-            <span className={styles.kicker}>Careers · MyHolidayBro</span>
+            <span className={styles.kicker}>{hero.kicker || "Careers · MyHolidayBro"}</span>
             <h1 className={styles.heading}>
-              Build the holiday company you{" "}
-              <span className={styles.headingAccent}>wish existed</span>.
+              {hero.heading || "Build the holiday company you"}{" "}
+              <span className={styles.headingAccent}>{hero.accent || "wish existed"}</span>.
             </h1>
             <p className={styles.sub}>
-              We're a small, very deliberate team obsessed with the craft of a great trip.
-              If that sounds like your kind of room — come build with us.
+              {hero.sub || "We're a small, very deliberate team obsessed with the craft of a great trip. If that sounds like your kind of room — come build with us."}
             </p>
           </div>
         </section>
@@ -78,7 +39,7 @@ export default function Page() {
         <section className={styles.perksWrap}>
           <div className={styles.container}>
             <div className={styles.perksGrid}>
-              {PERKS.map((p) => (
+              {perks.map((p) => (
                 <div key={p.t} className={styles.perkCard}>
                   <strong>{p.t}</strong>
                   <p>{p.d}</p>
@@ -97,10 +58,10 @@ export default function Page() {
             </h2>
 
             <div className={styles.roleList}>
-              {ROLES.map((r) => (
+              {roles.map((r) => (
                 <a
-                  key={r.title}
-                  href={`mailto:careers@myholidaybro.com?subject=Application · ${encodeURIComponent(r.title)}`}
+                  key={r.id || r.title}
+                  href={`mailto:${email}?subject=Application · ${encodeURIComponent(r.title)}`}
                   className={styles.roleCard}
                 >
                   <div className={styles.roleHead}>
@@ -121,11 +82,11 @@ export default function Page() {
             </div>
 
             <div className={styles.fallback}>
-              <strong>Don't see your role?</strong>
+              <strong>{fallback.title || "Don't see your role?"}</strong>
               <p>
-                We're always open to surprising fits. Send a note to{" "}
-                <a href="mailto:careers@myholidaybro.com">careers@myholidaybro.com</a> — tell us
-                what you'd build here and why.
+                {fallback.body || (
+                  <>We're always open to surprising fits. Send a note to <a href={`mailto:${email}`}>{email}</a> — tell us what you'd build here and why.</>
+                )}
               </p>
               <Link href="/contact" className={styles.fallbackCta}>Or say hi via contact</Link>
             </div>

@@ -25,11 +25,11 @@ function SignupInner() {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function onSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    const res = signup(form);
+    const res = await signup(form);
     setSubmitting(false);
     if (!res.ok) setError(res.error);
     else router.push(next);

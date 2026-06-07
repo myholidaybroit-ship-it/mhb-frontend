@@ -3,72 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./Stories.module.css";
 
-const TRAVELLERS = [
-  {
-    id: 1,
-    name: "Aishwarya Bali Holiday",
-    dest: "Bali",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219201/WhatsApp_Video_2026-05-16_at_1.31.18_PM_pa9p61.mp4",
-  },
-  {
-    id: 2,
-    name: "Harish Thailand Holiday",
-    dest: "Thailand",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219202/WhatsApp_Video_2026-05-16_at_1.30.17_PM_ocsjjm.mp4",
-  },
-  {
-    id: 3,
-    name: "Priyadarshini & Family Singapore Holiday",
-    dest: "Singapore",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219202/WhatsApp_Video_2026-05-16_at_1.31.13_PM_jx8yha.mp4",
-  },
-  {
-    id: 4,
-    name: "Mahesh Europe Holiday",
-    dest: "Europe",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219202/WhatsApp_Video_2026-05-16_at_1.31.38_PM_iqwua5.mp4",
-  },
-  {
-    id: 5,
-    name: "Sneha Vietnam Holiday",
-    dest: "Vietnam",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219203/WhatsApp_Video_2026-05-16_at_1.31.23_PM_ptaftv.mp4",
-  },
-  {
-    id: 6,
-    name: "Karthik Maldives Holiday",
-    dest: "Maldives",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219203/WhatsApp_Video_2026-05-16_at_1.32.13_PM_nixdcw.mp4",
-  },
-  {
-    id: 7,
-    name: "Anjali Dubai Holiday",
-    dest: "Dubai",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219204/WhatsApp_Video_2026-05-16_at_1.31.47_PM_dw1qae.mp4",
-  },
-  {
-    id: 8,
-    name: "Rohan Kashmir Holiday",
-    dest: "Kashmir",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219205/WhatsApp_Video_2026-05-16_at_1.31.25_PM_csb8ta.mp4",
-  },
-  {
-    id: 9,
-    name: "Pooja Ladakh Holiday",
-    dest: "Ladakh",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219213/WhatsApp_Video_2026-05-16_at_1.32.06_PM_dmnfiy.mp4",
-  },
-];
-
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 48 48" width="22" height="22" aria-hidden>
@@ -121,7 +55,8 @@ function XIcon() {
   );
 }
 
-export default function Stories() {
+export default function Stories({ data }) {
+  const TRAVELLERS = data?.items || [];
   const [active, setActive] = useState(null);
   const scrollerRef = useRef(null);
 
@@ -151,16 +86,17 @@ export default function Stories() {
       <div className={styles.container}>
         <div className={styles.head}>
           <h2 className={styles.heading}>
-            Straight from our travellers <span aria-hidden>&#10084;&#65039;</span>
+            {data?.title || "Straight from our travellers"}{" "}
+            <span aria-hidden>&#10084;&#65039;</span>
           </h2>
           <div className={styles.rating}>
             <GoogleIcon />
             <span className={styles.ratingText}>
               <span className={styles.ratingScore}>
-                4.6<span className={styles.ratingSub}>/5</span>
+                {data?.score || ""}<span className={styles.ratingSub}>/5</span>
                 <StarIcon />
               </span>
-              <span className={styles.ratingCount}>1,000 reviews</span>
+              <span className={styles.ratingCount}>{data?.ratingText || "1,000 reviews"}</span>
             </span>
           </div>
         </div>

@@ -4,18 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./ContactPage.module.css";
+import { forms } from "../lib/api";
 
 const C = (path) => `https://res.cloudinary.com/dyxxkrq8r/image/upload/${path}`;
-const HERO_COLLAGE = [
-  C("v1779220324/WhatsApp_Image_2026-05-16_at_1.32.35_PM_gmlnpp.jpg"),
-  C("v1779220324/WhatsApp_Image_2026-05-16_at_1.32.34_PM_eyigio.jpg"),
-  C("v1779220324/WhatsApp_Image_2026-05-16_at_1.32.34_PM_1_buerwk.jpg"),
-  C("v1779220324/WhatsApp_Image_2026-05-16_at_1.22.01_PM_y8n52r.jpg"),
-  C("v1779220323/WhatsApp_Image_2026-05-16_at_1.22.01_PM_2_htpd1q.jpg"),
-  C("v1779220323/WhatsApp_Image_2026-05-16_at_1.22.00_PM_ij9msi.jpg"),
-  C("v1779220323/WhatsApp_Image_2026-05-16_at_1.22.01_PM_1_jhjtxh.jpg"),
-  C("v1779220323/WhatsApp_Image_2026-05-16_at_1.21.56_PM_xizioz.jpg"),
-];
 
 /* ─────────── Icons ─────────── */
 const sv = (path, { fill = "none", sw = 2 } = {}) => (s) =>
@@ -60,66 +51,6 @@ const I = {
   cap: sv(<><path d="M22 10 12 4 2 10l10 6 10-6Z" /><path d="M6 12v5c2 1.5 4 2 6 2s4-.5 6-2v-5" /></>),
 };
 
-/* ─────────── Companion cards data ─────────── */
-const COMPANIONS = [
-  {
-    label: "Holiday Designers",
-    sub: "For all curated departures",
-    icon: "sparkle",
-    items: [
-      { name: "Beach Escapes", icon: "beach" },
-      { name: "Honeymoons", icon: "heart" },
-      { name: "Family Trips", icon: "family" },
-      { name: "Adventure", icon: "mountain" },
-      { name: "Weekends", icon: "sun" },
-      { name: "All-Girls", icon: "girls" },
-    ],
-  },
-  {
-    label: "Specialist Desks",
-    sub: "For all custom requests",
-    icon: "globe",
-    items: [
-      { name: "International Trips", icon: "plane" },
-      { name: "Domestic Trips", icon: "flag" },
-      { name: "Corporate Offsites", icon: "briefcase" },
-      { name: "School & College", icon: "cap" },
-    ],
-  },
-];
-
-/* ─────────── Quick Link cards ─────────── */
-const QUICK_LINKS = [
-  {
-    title: "Frequently Asked Questions",
-    sub: "Everything travellers ask before they book",
-    href: "/faq",
-    image: C("v1779220324/WhatsApp_Image_2026-05-16_at_1.22.01_PM_y8n52r.jpg"),
-    tint: "#fff4c2",
-  },
-  {
-    title: "Stories by MyHolidayBro",
-    sub: "Travel tales, lists & insider guides",
-    href: "/moments",
-    image: C("v1779220324/WhatsApp_Image_2026-05-16_at_1.32.34_PM_eyigio.jpg"),
-    tint: "#d2f5e3",
-  },
-  {
-    title: "MHB Insider Newsletter",
-    sub: "One email a month. Big trip ideas.",
-    href: "/newsletter",
-    image: C("v1779220323/WhatsApp_Image_2026-05-16_at_1.22.01_PM_2_htpd1q.jpg"),
-    tint: "#cfe2ff",
-  },
-  {
-    title: "Come Work With Us",
-    sub: "Roles in design, ops & travel",
-    href: "/careers",
-    image: C("v1779220324/WhatsApp_Image_2026-05-16_at_1.32.35_PM_gmlnpp.jpg"),
-    tint: "#ffd6e0",
-  },
-];
-
 const TRIP_TYPES = [
   "Beach holiday",
   "Honeymoon",
@@ -146,7 +77,11 @@ const DESTINATIONS = [
   "Not sure yet · Suggest me",
 ];
 
-export default function ContactPage() {
+export default function ContactPage({ content, settings }) {
+  const heroCollage = content?.heroCollage || [];
+  const companions = content?.companions || [];
+  const quickLinks = content?.quickLinks || [];
+
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
@@ -165,6 +100,19 @@ export default function ContactPage() {
 
   function onSubmit(e) {
     e.preventDefault();
+    forms
+      .enquiry({
+        type: "contact",
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        category: form.tripType,
+        destination: form.destination,
+        message: form.query,
+        marketing: form.optIn,
+      })
+      .catch((err) => console.error("Contact enquiry failed:", err.message));
     setSubmitted(true);
   }
 
@@ -174,7 +122,7 @@ export default function ContactPage() {
       <section className={styles.heroWrap}>
         <div className={styles.heroFrame}>
           <div className={styles.heroCollage} aria-hidden>
-            {HERO_COLLAGE.map((src, i) => (
+            {heroCollage.map((src, i) => (
               <span key={i} className={`${styles.heroTile} ${styles[`heroTile${i + 1}`]}`}>
                 <Image
                   src={src}
@@ -204,15 +152,15 @@ export default function ContactPage() {
             </p>
 
             <div className={styles.heroQuickRow}>
-              <a href="tel:+919966698990" className={styles.heroQuickCard}>
+              <a href={`tel:${settings?.supportPhone || ""}`} className={styles.heroQuickCard}>
                 <span className={styles.heroQuickIcon}>{I.phone(20)}</span>
                 <span className={styles.heroQuickMeta}>
-                  <strong>+91 96666 98990</strong>
+                  <strong>{settings?.supportPhone}</strong>
                   <span>Call us · 9 AM – 11 PM IST</span>
                 </span>
               </a>
               <a
-                href="https://wa.me/919966698990"
+                href={`https://wa.me/${settings?.whatsapp || ""}`}
                 target="_blank"
                 rel="noreferrer"
                 className={`${styles.heroQuickCard} ${styles.heroQuickWa}`}
@@ -223,10 +171,10 @@ export default function ContactPage() {
                   <span>Fastest way to a plan</span>
                 </span>
               </a>
-              <a href="mailto:contact@myholidaybro.com" className={styles.heroQuickCard}>
+              <a href={`mailto:${settings?.supportEmail || ""}`} className={styles.heroQuickCard}>
                 <span className={styles.heroQuickIcon}>{I.mail(20)}</span>
                 <span className={styles.heroQuickMeta}>
-                  <strong>contact@myholidaybro.com</strong>
+                  <strong>{settings?.supportEmail}</strong>
                   <span>For longer briefs & invoices</span>
                 </span>
               </a>
@@ -249,7 +197,7 @@ export default function ContactPage() {
           </div>
 
           <div className={styles.compGrid}>
-            {COMPANIONS.map((col) => (
+            {companions.map((col) => (
               <div key={col.label} className={styles.compCol}>
                 <div className={styles.compColHead}>
                   <span className={styles.compColIcon} aria-hidden>{I[col.icon](22)}</span>
@@ -262,7 +210,7 @@ export default function ContactPage() {
                   {col.items.map((it) => (
                     <a
                       key={it.name}
-                      href="https://wa.me/919966698990"
+                      href={`https://wa.me/${settings?.whatsapp || ""}`}
                       target="_blank"
                       rel="noreferrer"
                       className={styles.compTile}
@@ -287,7 +235,7 @@ export default function ContactPage() {
             <aside className={styles.captainCard}>
               <div className={styles.captainBg} aria-hidden>
                 <Image
-                  src={C("v1779220324/WhatsApp_Image_2026-05-16_at_1.32.35_PM_gmlnpp.jpg")}
+                  src={content?.captainImage || C("v1779220324/WhatsApp_Image_2026-05-16_at_1.32.35_PM_gmlnpp.jpg")}
                   alt=""
                   fill
                   sizes="(max-width: 900px) 100vw, 460px"
@@ -503,7 +451,7 @@ export default function ContactPage() {
           </div>
 
           <div className={styles.quickGrid}>
-            {QUICK_LINKS.map((q) => (
+            {quickLinks.map((q) => (
               <Link key={q.title} href={q.href} className={styles.quickCard} style={{ "--tint": q.tint }}>
                 <div className={styles.quickImg}>
                   <Image src={q.image} alt="" fill sizes="(max-width: 700px) 50vw, 25vw" className={styles.quickImgEl} />
@@ -534,18 +482,12 @@ export default function ContactPage() {
               <h2 className={styles.sectionHeading}>Find us at <span className={styles.headingAccent}>HQ</span>.</h2>
             </div>
             <div className={styles.mapAddresses}>
-              <div className={styles.mapAddress}>
-                <strong><span>{I.pin(14)}</span>Hyderabad</strong>
-                <span>Level 6, N Heights, Hitech City, Hyderabad — 500081</span>
-              </div>
-              <div className={styles.mapAddress}>
-                <strong><span>{I.pin(14)}</span>New Delhi</strong>
-                <span>Level 31, 1st Floor, Block L, Connaught Place, New Delhi — 110001</span>
-              </div>
-              <div className={styles.mapAddress}>
-                <strong><span>{I.pin(14)}</span>London</strong>
-                <span>Kemp House, 160 City Road, London EC1V 2NX, UK</span>
-              </div>
+              {(content?.offices || []).map((o) => (
+                <div key={o.city} className={styles.mapAddress}>
+                  <strong><span>{I.pin(14)}</span>{o.city}</strong>
+                  <span>{o.address}</span>
+                </div>
+              ))}
             </div>
           </div>
 

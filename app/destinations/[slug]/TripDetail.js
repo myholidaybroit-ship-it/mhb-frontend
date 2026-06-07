@@ -4,15 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useWishlist } from "../../components/WishlistContext";
-import {
-  AGE_LIMIT,
-  DESTINATION_LIST,
-  SHARED_EXCLUSIONS,
-  SHARED_FAQS,
-  SHARED_INCLUSIONS,
-  USPS,
-  img,
-} from "../../data/destinations";
+import { forms } from "../../lib/api";
+import { img } from "../../lib/img";
 import styles from "./TripDetail.module.css";
 
 /* ─────────── Icons ─────────── */
@@ -289,71 +282,6 @@ const AGE_BUCKETS = [
   { id: "seniors", label: "41 – 65", note: "Family", on: true },
 ];
 
-const REFUND_TIERS = [
-  { window: "30+ days", pct: 90, tone: "good" },
-  { window: "15 – 29 days", pct: 50, tone: "mid" },
-  { window: "7 – 14 days", pct: 25, tone: "low" },
-  { window: "Under 7 days", pct: 0, tone: "none" },
-];
-
-const TRAVEL_TESTIMONIALS = [
-  {
-    name: "Aanya Mehta",
-    initials: "AM",
-    city: "Mumbai",
-    trip: "Bali Honeymoon",
-    body:
-      "From airport pickup to the very last meal, every moment was planned with so much care. Our advisor even swapped two hotels last minute on our request without any fuss. Came home with stories to tell for years.",
-    when: "2 months ago",
-    color: "#fde68a",
-    accent: "#92400e",
-  },
-  {
-    name: "Rohan Iyer",
-    initials: "RI",
-    city: "Bengaluru",
-    trip: "Thailand Group",
-    body:
-      "Booked late and still pulled off a phenomenal itinerary. The local driver was fantastic and the surprise property upgrades made our group trip absolutely unforgettable.",
-    when: "5 weeks ago",
-    color: "#bae6fd",
-    accent: "#075985",
-  },
-  {
-    name: "Priya Sharma",
-    initials: "PS",
-    city: "Delhi NCR",
-    trip: "Kerala Family",
-    body:
-      "Trip ran exactly on schedule, hotels were genuinely 4-star, and our advisor checked in every single day. Worth every rupee — already planning our next booking.",
-    when: "3 months ago",
-    color: "#bbf7d0",
-    accent: "#166534",
-  },
-  {
-    name: "Arjun Kapoor",
-    initials: "AK",
-    city: "Pune",
-    trip: "Maldives Escape",
-    body:
-      "Overwater villa, seaplane ride, private sandbank picnic — everything we dreamed of. The team handled all the visa paperwork so we just had to show up and relax.",
-    when: "6 weeks ago",
-    color: "#fbcfe8",
-    accent: "#9d174d",
-  },
-  {
-    name: "Snehal Jain",
-    initials: "SJ",
-    city: "Hyderabad",
-    trip: "Ladakh Adventure",
-    body:
-      "Pangong, Nubra, Khardung La — paced so well that altitude never bothered us. Our guide knew every café and viewpoint. Truly the trip of a lifetime.",
-    when: "4 months ago",
-    color: "#ddd6fe",
-    accent: "#5b21b6",
-  },
-];
-
 // Compute carousel position (-2, -1, 0, 1, 2) or "hidden" for cards far from active.
 function relativePos(i, active, n) {
   const half = Math.floor(n / 2);
@@ -364,12 +292,8 @@ function relativePos(i, active, n) {
   return String(rel);
 }
 
-const PAY_METHODS = [
-  { label: "Credit card", icon: I.wallet },
-  { label: "Debit card", icon: I.wallet },
-  { label: "Internet banking", icon: I.shield },
-  { label: "Bank transfer", icon: I.bolt },
-];
+// Map a backend payment-method icon key to its SVG renderer.
+const PAY_ICONS = { wallet: I.wallet, shield: I.shield, bolt: I.bolt };
 
 function quickFacts(dest) {
   const india = dest.region === "India";
@@ -388,7 +312,25 @@ const EXCLUSION_ICONS = [I.bolt, I.wallet, I.compass, I.shield, I.cam, I.x];
 
 /* ─────────── Component ─────────── */
 
-export default function TripDetail({ dest }) {
+export default function TripDetail({ dest, content, related = [] }) {
+  const REFUND_TIERS = content?.cancellationTiers || [];
+  const PAY_METHODS = content?.paymentMethods || [];
+  const PAY_STAGES = content?.paymentStages || [];
+  const TRAVEL_TESTIMONIALS = content?.travelDiaries || [];
+
+  // Catalog destinations may ship without packaged trips / itinerary / overview.
+  // Derive safe defaults so every detail page renders fully and never crashes on
+  // thin data (the admin can refine these per destination later).
+  const packages = dest.packages?.length
+    ? dest.packages
+    : [
+        { name: `${dest.name} Getaway`, days: 5, nights: 4, price: dest.fromPrice || "On request", route: dest.name, tag: (dest.idealFor || "Trip").split("·")[0].trim() },
+        { name: `${dest.name} Explorer`, days: 7, nights: 6, price: dest.fromPrice || "On request", route: dest.name, tag: "Explorer" },
+      ];
+  const itinerary = dest.itinerary || [];
+  const overview = dest.overview || [];
+  const highlights = dest.highlights || [];
+
   const [pkgIdx, setPkgIdx] = useState(0);
   const [adults, setAdults] = useState(2);
   const [kids, setKids] = useState(0);
@@ -398,7 +340,7 @@ export default function TripDetail({ dest }) {
   const wishlistId = `destination:${dest.slug}`;
   const wished = wishlistHydrated && wishlistHas(wishlistId);
   function toggleWished() {
-    const pkg = dest.packages?.[0];
+    const pkg = packages?.[0];
     wishlistToggle({
       id: wishlistId,
       kind: "destination",
@@ -419,7 +361,19 @@ export default function TripDetail({ dest }) {
   function handleEnquirySubmit(e) {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !phone.trim()) return;
-    // Stub: in production this would POST to /api/enquiry with the lead.
+    forms
+      .enquiry({
+        type: "quote",
+        name,
+        email,
+        phone,
+        destination: dest.name,
+        package: pkg ? `${pkg.name} — ${pkg.days}D · ${pkg.price}` : undefined,
+        adults,
+        children: kids,
+        total: formatINR(grandTotal),
+      })
+      .catch((err) => console.error("Quote enquiry failed:", err.message));
     setSubmitted(true);
   }
 
@@ -482,7 +436,7 @@ export default function TripDetail({ dest }) {
     }, 250);
   }
 
-  const pkg = dest.packages[Math.min(pkgIdx, dest.packages.length - 1)];
+  const pkg = packages[Math.min(pkgIdx, packages.length - 1)];
 
   const basePrice = priceNumber(pkg.price);
   const taxesPerHead = Math.round(basePrice * 0.05);
@@ -545,16 +499,12 @@ export default function TripDetail({ dest }) {
     };
   }, [lightbox, closeLightbox, prevImage, nextImage]);
 
-  const related = useMemo(
-    () => DESTINATION_LIST.filter((d) => d.slug !== dest.slug).slice(0, 4),
-    [dest]
-  );
-
   const promo = useMemo(
     () =>
-      DESTINATION_LIST.find((d) => d.slug !== dest.slug && d.region === dest.region) ||
-      DESTINATION_LIST[0],
-    [dest]
+      related.find((d) => d.slug !== dest.slug && d.region === dest.region) ||
+      related[0] ||
+      null,
+    [related, dest]
   );
 
   const stats = [
@@ -569,7 +519,7 @@ export default function TripDetail({ dest }) {
   // has more days than the destination's authored itinerary, pad with leisure
   // / departure days so the count matches what the customer is booking.
   const itinDays = useMemo(() => {
-    const base = dest.itinerary.slice(0, pkg.days).map((d) => ({ ...d }));
+    const base = itinerary.slice(0, pkg.days).map((d) => ({ ...d }));
     while (base.length < pkg.days) {
       const day = base.length + 1;
       const last = day === pkg.days;
@@ -602,9 +552,10 @@ export default function TripDetail({ dest }) {
   }
 
   const facts = useMemo(() => quickFacts(dest), [dest]);
-  const inclusions = SHARED_INCLUSIONS.slice(0, 6);
-  const exclusions = SHARED_EXCLUSIONS.slice(0, 6);
-  const faqs = SHARED_FAQS.slice(0, 4);
+  const inclusions = content?.inclusions || [];
+  const exclusions = content?.exclusions || [];
+  const usps = content?.usps || [];
+  const faqs = (content?.faqs || []).slice(0, 4);
 
   return (
     <main className={styles.page}>
@@ -743,9 +694,9 @@ export default function TripDetail({ dest }) {
 
             {/* Overview — one short paragraph + visual highlight cards */}
             <Section title={`Why ${dest.name}?`} kicker={dest.region === "India" ? "Indian escape" : "Curated overseas"}>
-              <p className={styles.lead}>{dest.overview[0]}</p>
+              <p className={styles.lead}>{overview[0]}</p>
               <div className={styles.highlightGrid}>
-                {dest.highlights.slice(0, 6).map((h, i) => (
+                {highlights.slice(0, 6).map((h, i) => (
                   <div key={h} className={styles.highlightCard}>
                     <span className={styles.highlightIcon}>
                       {[I.cam, I.compass, I.route, I.bed, I.sun, I.coffee][i % 6]()}
@@ -761,9 +712,9 @@ export default function TripDetail({ dest }) {
             <Section title={`${dest.name} packages`} kicker="Pick the trip that fits" id="packages">
               <div
                 className={styles.pkgGrid}
-                style={{ "--pkg-cols": Math.min(dest.packages.length, 4) }}
+                style={{ "--pkg-cols": Math.min(packages.length, 4) }}
               >
-                {dest.packages.map((p, i) => {
+                {packages.map((p, i) => {
                   const active = i === pkgIdx;
                   const pNights = p.nights ?? p.days - 1;
                   const pImg = heroImages[i % heroImages.length];
@@ -861,10 +812,10 @@ export default function TripDetail({ dest }) {
                   <strong>{pkg.name}</strong>
                   <span>{I.pin(12)} {pkg.route} · {pkg.days} days</span>
                 </div>
-                {dest.packages.length > 1 && (
+                {packages.length > 1 && (
                   <div className={styles.itinPkgSwitch}>
                     <span className={styles.itinPkgSwitchLabel}>Switch:</span>
-                    {dest.packages.map((p, i) => (
+                    {packages.map((p, i) => (
                       <button
                         key={p.name}
                         type="button"
@@ -914,7 +865,7 @@ export default function TripDetail({ dest }) {
             {/* Don't miss these — must-do activities */}
             <Section title="Don't miss these" kicker="Top experiences on this trip">
               <div className={styles.mustGrid}>
-                {dest.highlights.slice(0, 6).map((h, i) => {
+                {highlights.slice(0, 6).map((h, i) => {
                   const IconC = mustDoIcon(i);
                   return (
                     <article key={h} className={styles.mustCard}>
@@ -955,20 +906,22 @@ export default function TripDetail({ dest }) {
             </Section>
 
             {/* Promo banner */}
-            <Link href={`/destinations/${promo.slug}`} className={styles.promoBanner}>
-              <Image
-                src={img(promo.imageKey, 1400, 500)}
-                alt={`${promo.name}`}
-                fill
-                sizes="(max-width: 900px) 100vw, 800px"
-                className={styles.galImg}
-              />
-              <div className={styles.promoOverlay}>
-                <span className={styles.promoKicker}>Pair with</span>
-                <h3 className={styles.promoTitle}>{promo.name}</h3>
-                <span className={styles.promoCta}>From {promo.fromPrice} {I.chevRight()}</span>
-              </div>
-            </Link>
+            {promo && (
+              <Link href={`/destinations/${promo.slug}`} className={styles.promoBanner}>
+                <Image
+                  src={img(promo.imageKey, 1400, 500)}
+                  alt={`${promo.name}`}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 800px"
+                  className={styles.galImg}
+                />
+                <div className={styles.promoOverlay}>
+                  <span className={styles.promoKicker}>Pair with</span>
+                  <h3 className={styles.promoTitle}>{promo.name}</h3>
+                  <span className={styles.promoCta}>From {promo.fromPrice} {I.chevRight()}</span>
+                </div>
+              </Link>
+            )}
 
             {/* Inclusions & exclusions — icon cards */}
             <Section title="What's included">
@@ -1019,24 +972,23 @@ export default function TripDetail({ dest }) {
             {/* Payment policy — 2 stage cards + methods */}
             <Section title="Payment policy">
               <div className={styles.payGrid}>
-                <div className={styles.payCard}>
-                  <span className={styles.payStep}>01</span>
-                  <strong className={styles.payAmt}>Booking</strong>
-                  <span className={styles.payTitle}>Partial amount</span>
-                  <span className={styles.paySub}>Sum is set per tour operator and confirms your slot</span>
-                </div>
-                <div className={`${styles.payCard} ${styles.payCardDark}`}>
-                  <span className={styles.payStep}>02</span>
-                  <strong className={styles.payAmt}>Balance</strong>
-                  <span className={styles.payTitle}>Within 3 days</span>
-                  <span className={styles.paySub}>Of paying the booking amount (or earlier if under 30 days to departure)</span>
-                </div>
+                {PAY_STAGES.map((p) => (
+                  <div
+                    key={p.step}
+                    className={`${styles.payCard} ${p.tone === "dark" ? styles.payCardDark : ""}`}
+                  >
+                    <span className={styles.payStep}>{p.step}</span>
+                    <strong className={styles.payAmt}>{p.amount}</strong>
+                    <span className={styles.payTitle}>{p.title}</span>
+                    <span className={styles.paySub}>{p.sub}</span>
+                  </div>
+                ))}
               </div>
               <div className={styles.payMethods}>
                 <span className={styles.payMethodsLabel}>Pay via</span>
                 {PAY_METHODS.map((m) => (
                   <span key={m.label} className={styles.payMethod}>
-                    <span className={styles.payMethodIcon}>{m.icon()}</span>
+                    <span className={styles.payMethodIcon}>{(PAY_ICONS[m.icon] || I.wallet)()}</span>
                     {m.label}
                   </span>
                 ))}
@@ -1173,7 +1125,7 @@ export default function TripDetail({ dest }) {
                       onChange={(e) => setPkgIdx(Number(e.target.value))}
                       className={styles.formSelect}
                     >
-                      {dest.packages.map((p, i) => (
+                      {packages.map((p, i) => (
                         <option key={p.name} value={i}>
                           {p.name} — {p.days}D · {p.price}
                         </option>
@@ -1217,7 +1169,7 @@ export default function TripDetail({ dest }) {
             )}
 
             <div className={styles.uspCard}>
-              {USPS.map((u, i) => (
+              {usps.map((u, i) => (
                 <div key={u.title} className={styles.uspRow}>
                   <span className={styles.uspIcon}>{[I.shield, I.wallet, I.users, I.star][i % 4]()}</span>
                   <div>
@@ -1613,7 +1565,7 @@ export default function TripDetail({ dest }) {
                           onChange={(e) => setPkgIdx(Number(e.target.value))}
                           className={styles.formSelect}
                         >
-                          {dest.packages.map((p, i) => (
+                          {packages.map((p, i) => (
                             <option key={p.name} value={i}>
                               {p.name} — {p.days}D · {p.price}
                             </option>

@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import WishlistButton from "../../components/WishlistButton";
-import { WEEKEND_TRIPS } from "../../data/weekends";
 import styles from "./WeekendDetail.module.css";
+import { forms } from "../../lib/api";
 
 const sv = (path, sw = 2) => (s = 18) => (
   <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" aria-hidden>{path}</svg>
@@ -23,19 +23,8 @@ const I = {
   share: sv(<><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98" /></>),
 };
 
-const INCLUSIONS = [
-  { icon: "bus", text: "Round-trip transport from your city" },
-  { icon: "bed", text: "Stay in vetted boutique properties" },
-  { icon: "utensils", text: "Daily breakfast included" },
-  { icon: "ticket", text: "Activities & entry tickets covered" },
-];
-
-const EXCLUSIONS = [
-  "Personal expenses (laundry, calls, tips)",
-  "Lunches & dinners unless mentioned",
-  "Any activity not in the itinerary",
-  "Travel insurance",
-];
+// Map a backend inclusion icon key to its SVG renderer.
+const INCLUSION_ICONS = { bus: I.bus, bed: I.bed, utensils: I.utensils, ticket: I.ticket, check: I.check };
 
 function Day({ n, title, body, open, onClick }) {
   return (
@@ -96,7 +85,9 @@ function defaultItinerary(trip) {
   return base;
 }
 
-export default function WeekendDetail({ trip }) {
+export default function WeekendDetail({ trip, content, related = [] }) {
+  const INCLUSIONS = content?.weekendInclusions || [];
+  const EXCLUSIONS = content?.weekendExclusions || [];
   const [openDay, setOpenDay] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -107,7 +98,21 @@ export default function WeekendDetail({ trip }) {
   const gallery = buildGallery(trip);
 
   function update(k, v) { setForm((f) => ({ ...f, [k]: v })); }
-  function onSubmit(e) { e.preventDefault(); setSubmitted(true); }
+  function onSubmit(e) {
+    e.preventDefault();
+    forms
+      .enquiry({
+        type: "weekend",
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        trip: trip.name,
+        price: trip.salePrice,
+        channel: "Callback",
+      })
+      .catch((err) => console.error("Weekend enquiry failed:", err.message));
+    setSubmitted(true);
+  }
 
   useEffect(() => {
     if (!galleryOpen) return;
@@ -125,14 +130,7 @@ export default function WeekendDetail({ trip }) {
     };
   }, [galleryOpen, gallery.length]);
 
-  const related = WEEKEND_TRIPS.filter((t) => t.id !== trip.id).slice(0, 3);
-
-  const faqs = [
-    { q: "How do I get picked up?", a: `Pickup from ${trip.from} happens early morning on Day 1. We share the exact point + driver contact 24 hours before.` },
-    { q: "Can I extend by a day?", a: "Absolutely — message your trip captain. We rebuild the plan and add the extra night's stay + transport at cost." },
-    { q: "What's the cancellation policy?", a: "Free up to 14 days before departure. 50% refund 7–14 days out. After that, the booking is non-refundable but transferable." },
-    { q: "Is this trip safe for solo travellers?", a: "Yes. Most weekend trips have 60–70% solo travellers. The group is small (usually 8–12) and the trip captain is on-call throughout." },
-  ];
+  const faqs = content?.faqs || [];
 
   return (
     <main className={styles.page}>
@@ -267,7 +265,7 @@ export default function WeekendDetail({ trip }) {
                     <strong>Included</strong>
                     <ul>
                       {INCLUSIONS.map((it) => (
-                        <li key={it.text}><span className={styles.checkOk}>{I.check(14)}</span> {it.text}</li>
+                        <li key={it.text}><span className={styles.checkOk}>{(INCLUSION_ICONS[it.icon] || I.check)(14)}</span> {it.text}</li>
                       ))}
                     </ul>
                   </div>
@@ -443,8 +441,10 @@ export default function WeekendDetail({ trip }) {
             <h2 className={styles.h2}>Other quick getaways travellers love.</h2>
           </div>
           <div className={styles.relGrid}>
-            {related.map((t) => (
-              <Link key={t.id} href={`/weekends/${t.id}`} className={styles.relCard}>
+            {related.map((t) => {
+              const tid = t.id || t._id;
+              return (
+              <Link key={tid} href={`/weekends/${tid}`} className={styles.relCard}>
                 <div className={styles.relImg}>
                   <Image src={t.image} alt={t.name} fill sizes="(max-width: 800px) 100vw, 33vw" className={styles.relImgEl} />
                   <span className={styles.relTag}>Save {t.savings}</span>
@@ -458,7 +458,8 @@ export default function WeekendDetail({ trip }) {
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

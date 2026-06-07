@@ -14,6 +14,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        // Admin-uploaded media (S3) — any *.amazonaws.com host.
+        protocol: "https",
+        hostname: "**.amazonaws.com",
+      },
     ],
   },
 };

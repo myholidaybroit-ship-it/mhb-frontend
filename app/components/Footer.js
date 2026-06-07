@@ -1,56 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./Footer.module.css";
-
-const LOGO_WHITE =
-  "https://res.cloudinary.com/dyxxkrq8r/image/upload/v1779211833/MHB_Logo_white_b2exxe.avif";
-
-const COLS = [
-  {
-    title: "About MyHolidayBro",
-    links: [
-      { label: "About us", href: "/#why-us" },
-      { label: "Careers", href: "#" },
-      { label: "Press", href: "/#featured-on" },
-      { label: "Trust & Safety", href: "/#stories" },
-      { label: "Travel Stories", href: "/#blogs" },
-    ],
-  },
-  {
-    title: "Explore",
-    links: [
-      { label: "Destinations", href: "/destinations" },
-      { label: "Adventure Styles", href: "/#travelers" },
-      { label: "Weekend Trips", href: "/#weekends" },
-      { label: "Group Tours", href: "/destinations" },
-      { label: "Deals & Offers", href: "/#bookings" },
-    ],
-  },
-  {
-    title: "Help & Policies",
-    links: [
-      { label: "Help Centre", href: "/terms#complaints" },
-      { label: "Terms of Use", href: "/terms" },
-      { label: "Privacy Policy", href: "/terms#privacy" },
-      { label: "Cookie Policy", href: "/terms#privacy" },
-      { label: "Refund Policy", href: "/terms#refunds" },
-    ],
-  },
-];
-
-const OFFICES = [
-  {
-    city: "Hyderabad",
-    address: "Level 6, N Heights, Hitech City, Hyderabad — 500081",
-  },
-  {
-    city: "New Delhi",
-    address: "Level 31, 1st Floor, Block L, Connaught Place, New Delhi — 110001",
-  },
-  {
-    city: "London",
-    address: "Kemp House, 160 City Road, London EC1V 2NX, UK",
-  },
-];
+import { getContent } from "../lib/server";
 
 function PhoneIcon() {
   return (
@@ -111,22 +62,48 @@ function ChevronDown() {
   );
 }
 
-export default function Footer() {
+const LOGO_WHITE =
+  "https://res.cloudinary.com/dyxxkrq8r/image/upload/v1779211833/MHB_Logo_white_b2exxe.avif";
+
+const SOCIAL_ICONS = {
+  Instagram: InstagramIcon,
+  Facebook: FacebookIcon,
+  YouTube: YouTubeIcon,
+  WhatsApp: WhatsAppIcon,
+};
+
+export default async function Footer() {
+  // Footer content served live from the CMS `footer` singleton.
+  const f = (await getContent("footer")) || {};
+  const cols = f.columns || [];
+  const offices = f.offices || [];
+  const contact = f.contact || {};
+  const social = f.social || [];
+  const copyright = f.copyright;
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
         <div className={styles.top}>
-          {COLS.map((col) => (
+          {cols.map((col) => (
             <div className={styles.col} key={col.title}>
               <h3 className={styles.colTitle}>{col.title}</h3>
               <ul className={styles.colList}>
-                {col.links.map((l) => (
-                  <li key={l.label}>
-                    <a href={l.href} className={styles.link}>
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
+                {col.links.map((l) => {
+                  const isInternal = l.href.startsWith("/") && !l.href.startsWith("/#");
+                  return (
+                    <li key={l.label}>
+                      {isInternal ? (
+                        <Link href={l.href} className={styles.link}>
+                          {l.label}
+                        </Link>
+                      ) : (
+                        <a href={l.href} className={styles.link}>
+                          {l.label}
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -134,38 +111,47 @@ export default function Footer() {
           <div className={styles.col}>
             <h3 className={styles.colTitle}>Reach Us</h3>
             <ul className={styles.colList}>
-              <li>
-                <a href="tel:+919666698990" className={styles.contactLine}>
-                  <PhoneIcon />
-                  <span>+91 96666 98990</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:contact@myholidaybro.com"
-                  className={styles.contactLine}
-                >
-                  <MailIcon />
-                  <span>contact@myholidaybro.com</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://wa.me/message/BFYRF5O6RLEEB1"
-                  className={styles.contactLine}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <WhatsAppIcon />
-                  <span>Chat on WhatsApp</span>
-                </a>
-              </li>
+              {contact.phone && (
+                <li>
+                  <a
+                    href={`tel:${contact.phone.replace(/\s+/g, "")}`}
+                    className={styles.contactLine}
+                  >
+                    <PhoneIcon />
+                    <span>{contact.phone}</span>
+                  </a>
+                </li>
+              )}
+              {contact.email && (
+                <li>
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className={styles.contactLine}
+                  >
+                    <MailIcon />
+                    <span>{contact.email}</span>
+                  </a>
+                </li>
+              )}
+              {contact.whatsapp && (
+                <li>
+                  <a
+                    href={contact.whatsapp}
+                    className={styles.contactLine}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <WhatsAppIcon />
+                    <span>Chat on WhatsApp</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>
 
         <div className={styles.offices}>
-          {OFFICES.map((o) => (
+          {offices.map((o) => (
             <div className={styles.office} key={o.city}>
               <span className={styles.officeCity}>{o.city}</span>
               <span className={styles.officeAddress}>{o.address}</span>
@@ -185,11 +171,9 @@ export default function Footer() {
               className={styles.logo}
             />
             <div className={styles.copyrightWrap}>
-              <span className={styles.copyright}>
-                © 2026 MyHolidayBro. All rights reserved.
-              </span>
+              <span className={styles.copyright}>{copyright}</span>
               <div className={styles.legalLinks}>
-                <a href="/terms">Terms</a>
+                <Link href="/terms">Terms</Link>
                 <span aria-hidden>·</span>
                 <a href="/terms#privacy">Privacy</a>
                 <span aria-hidden>·</span>
@@ -210,42 +194,21 @@ export default function Footer() {
               </button>
             </div>
             <div className={styles.social}>
-              <a
-                href="https://instagram.com/myholidaybro"
-                aria-label="Instagram"
-                className={styles.socialIcon}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <InstagramIcon />
-              </a>
-              <a
-                href="https://facebook.com/myholidaybro"
-                aria-label="Facebook"
-                className={styles.socialIcon}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FacebookIcon />
-              </a>
-              <a
-                href="https://youtube.com/channel/UCMxPOv3BX5OCRNS-bZ_gH1g"
-                aria-label="YouTube"
-                className={styles.socialIcon}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <YouTubeIcon />
-              </a>
-              <a
-                href="https://wa.me/message/BFYRF5O6RLEEB1"
-                aria-label="WhatsApp"
-                className={styles.socialIcon}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <WhatsAppIcon />
-              </a>
+              {social.map((s) => {
+                const Icon = SOCIAL_ICONS[s.network];
+                return (
+                  <a
+                    key={s.network}
+                    href={s.url}
+                    aria-label={s.network}
+                    className={styles.socialIcon}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {Icon ? <Icon /> : null}
+                  </a>
+                );
+              })}
             </div>
           </div>
         </div>

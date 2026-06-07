@@ -1,15 +1,6 @@
 import Image from "next/image";
 import styles from "./WhyUs.module.css";
 
-const C = (path) => `https://res.cloudinary.com/dyxxkrq8r/image/upload/${path}`;
-
-const COLLAGE = [
-  C("v1779220323/WhatsApp_Image_2026-05-16_at_1.19.11_PM_lbbzqo.jpg"),
-  C("v1779220322/WhatsApp_Image_2026-05-16_at_1.19.05_PM_yvw52x.jpg"),
-  C("v1779220322/WhatsApp_Image_2026-05-16_at_1.20.03_PM_gq7ecr.jpg"),
-  C("v1779220321/WhatsApp_Image_2026-05-16_at_1.18.59_PM_supqut.jpg"),
-];
-
 function SmileIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -66,22 +57,22 @@ function SparkleIcon() {
   );
 }
 
-const STATS = [
-  { Icon: SmileIcon, value: "1,000+", label: "Happy travellers" },
-  { Icon: GlobeIcon, value: "60+", label: "Destinations covered" },
-  { Icon: RouteIcon, value: "300+", label: "Tours delivered" },
-  { Icon: ClockIcon, value: "24/7", label: "Trip support" },
-  { Icon: HeartIcon, value: "100%", label: "Satisfaction" },
-  { Icon: SparkleIcon, value: "Handpicked", label: "Itineraries" },
-];
+// Stat icons in display order — matched to CMS stats by index.
+const STAT_ICONS = [SmileIcon, GlobeIcon, RouteIcon, ClockIcon, HeartIcon, SparkleIcon];
 
-export default function WhyUs() {
+export default function WhyUs({ data }) {
+  const collage = data?.collage || [];
+  const stats = (data?.stats || []).map((s, i) => ({
+    ...s,
+    Icon: STAT_ICONS[i % STAT_ICONS.length],
+  }));
+  const paragraphs = data?.bodyParagraphs || [];
   return (
     <section className={styles.section} id="why-us">
       <div className={styles.container}>
         <div className={styles.grid}>
           <div className={styles.collage}>
-            {COLLAGE.map((src, i) => (
+            {collage.map((src, i) => (
               <div
                 key={src}
                 className={`${styles.tile} ${styles[`tile${i + 1}`]}`}
@@ -98,25 +89,18 @@ export default function WhyUs() {
           </div>
 
           <div className={styles.content}>
-            <span className={styles.eyebrow}>Why choose us</span>
+            <span className={styles.eyebrow}>{data?.eyebrow}</span>
             <h2 className={styles.heading}>
-              Why <span className={styles.headingAccent}>MyHolidayBro</span>
+              Why <span className={styles.headingAccent}>{data?.heading}</span>
             </h2>
 
             <blockquote className={styles.quote}>
-              &ldquo;Bro, lose yourself. Discover yourself.&rdquo;
+              &ldquo;{data?.quote}&rdquo;
             </blockquote>
 
-            <p className={styles.body}>
-              MyHolidayBro is your travel buddy that takes the work out of
-              holidays — handpicked stays, custom itineraries, and a dedicated
-              trip advisor, so all you do is show up and enjoy.
-            </p>
-            <p className={styles.body}>
-              Across 60+ destinations and 300+ delivered tours, we&apos;ve made
-              travel feel effortless for 1,000+ travellers — with 24/7 support
-              and a best-price promise on every booking.
-            </p>
+            {paragraphs.map((para, i) => (
+              <p className={styles.body} key={i}>{para}</p>
+            ))}
 
             <a href="#" className={styles.viewMore}>
               View more
@@ -127,7 +111,7 @@ export default function WhyUs() {
             </a>
 
             <div className={styles.stats}>
-              {STATS.map(({ Icon, value, label }) => (
+              {stats.map(({ Icon, value, label }) => (
                 <div key={label} className={styles.statCard}>
                   <span className={styles.statIcon}>
                     <Icon />

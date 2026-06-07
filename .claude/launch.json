@@ -14,6 +14,14 @@
       "runtimeArgs": ["next", "dev", "-p", "3030"],
       "port": 3030,
       "autoPort": false
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "admin",
+      "port": 5174,
+      "autoPort": false
     }
   ]
 }

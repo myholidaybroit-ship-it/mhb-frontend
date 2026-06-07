@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { WEEKEND_TRIPS } from "../data/weekends";
 import styles from "./Weekends.module.css";
 import WishlistButton from "./WishlistButton";
 
@@ -13,9 +12,9 @@ function ArrowIcon() {
   );
 }
 
-export default function Weekends() {
+export default function Weekends({ trips }) {
   // Show first 4 on the home page; the full list lives on /weekends.
-  const preview = WEEKEND_TRIPS.slice(0, 4);
+  const preview = (trips || []).slice(0, 4);
 
   return (
     <section className={styles.section} id="weekends">

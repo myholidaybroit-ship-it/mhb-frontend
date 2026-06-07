@@ -1,9 +1,17 @@
 "use client";
 
+// Wishlist context. When the visitor is logged in, the wishlist lives in the
+// backend (per-user). Guests still get a localStorage wishlist, which is merged
+// into their account on the next login. Public surface is unchanged
+// (items, count, hydrated, has, add, remove, toggle, clear).
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { account, getToken } from "../lib/api";
 
 const WishlistContext = createContext(null);
 const STORAGE_KEY = "mhb_wishlist_v1";
+
+const loggedIn = () => !!getToken();
 
 function read() {
   if (typeof window === "undefined") return [];
@@ -24,55 +32,62 @@ export function WishlistProvider({ children }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setItems(read());
-    setHydrated(true);
+    let cancelled = false;
+    (async () => {
+      if (loggedIn()) {
+        try {
+          let server = (await account.wishlist()).items || [];
+          // Merge any items the visitor saved as a guest before logging in.
+          const local = read();
+          if (local.length) {
+            const ids = new Set(server.map((i) => i.id));
+            const merged = [...server, ...local.filter((i) => !ids.has(i.id))];
+            if (merged.length !== server.length) server = (await account.setWishlist(merged)).items;
+            write([]);
+          }
+          if (!cancelled) setItems(server);
+        } catch {
+          if (!cancelled) setItems(read());
+        }
+      } else if (!cancelled) {
+        setItems(read());
+      }
+      if (!cancelled) setHydrated(true);
+    })();
+
     function onStorage(e) {
-      if (e.key === STORAGE_KEY) setItems(read());
+      if (e.key === STORAGE_KEY && !loggedIn()) setItems(read());
     }
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  const persist = useCallback((next) => {
-    setItems(next);
-    write(next);
+    return () => { cancelled = true; window.removeEventListener("storage", onStorage); };
   }, []);
 
   const has = useCallback((id) => items.some((i) => i.id === id), [items]);
 
-  const add = useCallback(
-    (item) => {
-      if (!item?.id) return;
-      setItems((prev) => {
-        if (prev.some((i) => i.id === item.id)) return prev;
-        const next = [{ ...item, addedAt: Date.now() }, ...prev];
-        write(next);
-        return next;
-      });
-    },
-    []
-  );
+  const add = useCallback((item) => {
+    if (!item?.id) return;
+    setItems((prev) => (prev.some((i) => i.id === item.id) ? prev : [{ ...item, addedAt: Date.now() }, ...prev]));
+    if (loggedIn()) account.addWishlist(item).then((r) => setItems(r.items)).catch(() => {});
+    else setItems((prev) => { write(prev); return prev; });
+  }, []);
 
   const remove = useCallback((id) => {
-    setItems((prev) => {
-      const next = prev.filter((i) => i.id !== id);
-      write(next);
-      return next;
-    });
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    if (loggedIn()) account.removeWishlist(id).then((r) => setItems(r.items)).catch(() => {});
+    else setItems((prev) => { write(prev); return prev; });
   }, []);
 
   const toggle = useCallback((item) => {
-    setItems((prev) => {
-      const exists = prev.some((i) => i.id === item.id);
-      const next = exists
-        ? prev.filter((i) => i.id !== item.id)
-        : [{ ...item, addedAt: Date.now() }, ...prev];
-      write(next);
-      return next;
-    });
-  }, []);
+    const exists = items.some((i) => i.id === item.id);
+    if (exists) remove(item.id);
+    else add(item);
+  }, [items, add, remove]);
 
-  const clear = useCallback(() => persist([]), [persist]);
+  const clear = useCallback(() => {
+    setItems([]);
+    if (loggedIn()) account.clearWishlist().catch(() => {});
+    else write([]);
+  }, []);
 
   const value = useMemo(
     () => ({ items, count: items.length, hydrated, has, add, remove, toggle, clear }),

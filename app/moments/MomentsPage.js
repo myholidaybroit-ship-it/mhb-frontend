@@ -2,84 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MOMENTS } from "../components/Moments";
 import styles from "./MomentsPage.module.css";
-
-/* ─────────── Testimonial videos (same source files used elsewhere on the site) ─────────── */
-const TESTIMONIAL_VIDEOS = [
-  {
-    id: "v1",
-    name: "Aishwarya",
-    dest: "Bali",
-    quote: "Felt like a private concierge planned every minute.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219201/WhatsApp_Video_2026-05-16_at_1.31.18_PM_pa9p61.mp4",
-  },
-  {
-    id: "v2",
-    name: "Harish",
-    dest: "Thailand",
-    quote: "Best 7 days I've spent in years. Zero stress.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219202/WhatsApp_Video_2026-05-16_at_1.30.17_PM_ocsjjm.mp4",
-  },
-  {
-    id: "v3",
-    name: "Priyadarshini",
-    dest: "Singapore",
-    quote: "Kids loved every day — MHB nailed the schedule.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219202/WhatsApp_Video_2026-05-16_at_1.31.13_PM_jx8yha.mp4",
-  },
-  {
-    id: "v4",
-    name: "Mahesh",
-    dest: "Europe",
-    quote: "Multi-country and never felt rushed. Wild.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219202/WhatsApp_Video_2026-05-16_at_1.31.38_PM_iqwua5.mp4",
-  },
-  {
-    id: "v5",
-    name: "Sneha",
-    dest: "Vietnam",
-    quote: "Hoi An lanterns, Halong cruise — chef's kiss.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219203/WhatsApp_Video_2026-05-16_at_1.31.23_PM_ptaftv.mp4",
-  },
-  {
-    id: "v6",
-    name: "Karthik",
-    dest: "Maldives",
-    quote: "Honeymoon goals — every detail was thought through.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219203/WhatsApp_Video_2026-05-16_at_1.32.13_PM_nixdcw.mp4",
-  },
-  {
-    id: "v7",
-    name: "Anjali",
-    dest: "Dubai",
-    quote: "Desert safari at sunset — speechless.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219204/WhatsApp_Video_2026-05-16_at_1.31.47_PM_dw1qae.mp4",
-  },
-  {
-    id: "v8",
-    name: "Rohan",
-    dest: "Kashmir",
-    quote: "Snow, shikara, and the warmest hosts.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219205/WhatsApp_Video_2026-05-16_at_1.31.25_PM_csb8ta.mp4",
-  },
-  {
-    id: "v9",
-    name: "Pooja",
-    dest: "Ladakh",
-    quote: "Altitude, awe, and the smoothest planning.",
-    video:
-      "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779219213/WhatsApp_Video_2026-05-16_at_1.32.06_PM_dmnfiy.mp4",
-  },
-];
 
 /* ─────────── Icons ─────────── */
 const I = {
@@ -138,10 +61,10 @@ const I = {
 // Cycle through aspect ratios so the masonry feels organic.
 const ASPECTS = ["4 / 5", "3 / 4", "1 / 1", "5 / 6", "4 / 5", "3 / 4"];
 
-// A few photos to feather across the hero strip as a moving backdrop.
-const HERO_STRIP = MOMENTS.slice(0, 12);
-
-export default function MomentsPage() {
+export default function MomentsPage({ moments = [], videos = [] }) {
+  const MOMENTS = moments;
+  // A few photos to feather across the hero strip as a moving backdrop.
+  const HERO_STRIP = MOMENTS.slice(0, 12);
   const [active, setActive] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
   const videoScrollerRef = useRef(null);
@@ -160,14 +83,14 @@ export default function MomentsPage() {
       const i = MOMENTS.findIndex((x) => x.id === m.id);
       return MOMENTS[(i + MOMENTS.length - 1) % MOMENTS.length];
     });
-  }, []);
+  }, [MOMENTS]);
   const next = useCallback(() => {
     setActive((m) => {
       if (!m) return m;
       const i = MOMENTS.findIndex((x) => x.id === m.id);
       return MOMENTS[(i + 1) % MOMENTS.length];
     });
-  }, []);
+  }, [MOMENTS]);
 
   useEffect(() => {
     if (!active && !activeVideo) return;
@@ -261,7 +184,7 @@ export default function MomentsPage() {
               {I.arrowR(18)}
             </button>
             <div className={styles.videoScroller} ref={videoScrollerRef}>
-            {TESTIMONIAL_VIDEOS.map((v, i) => (
+            {videos.map((v, i) => (
               <button
                 key={v.id}
                 type="button"

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { WEEKEND_TRIPS } from "../data/weekends";
 import WishlistButton from "../components/WishlistButton";
 import styles from "./WeekendsPage.module.css";
 
@@ -19,8 +18,9 @@ function priceNum(s) {
   return parseInt(String(s).replace(/[^\d]/g, ""), 10) || 0;
 }
 
-export default function WeekendsPage() {
-  const minPrice = WEEKEND_TRIPS.reduce(
+export default function WeekendsPage({ trips }) {
+  const LIST = trips || [];
+  const minPrice = LIST.reduce(
     (lo, t) => Math.min(lo, priceNum(t.salePrice)),
     Infinity
   );
@@ -44,7 +44,7 @@ export default function WeekendsPage() {
             </div>
             <div className={styles.headStats}>
               <div className={styles.headStat}>
-                <strong>{WEEKEND_TRIPS.length}</strong>
+                <strong>{LIST.length}</strong>
                 <span>Routes</span>
               </div>
               <div className={styles.headStatDivider} aria-hidden />
@@ -65,8 +65,10 @@ export default function WeekendsPage() {
       <section className={styles.gridWrap}>
         <div className={styles.container}>
           <div className={styles.grid}>
-            {WEEKEND_TRIPS.map((t) => (
-              <Link key={t.id} href={`/weekends/${t.id}`} className={styles.card}>
+            {LIST.map((t) => {
+              const tid = t.id || t._id;
+              return (
+              <Link key={tid} href={`/weekends/${tid}`} className={styles.card}>
                 <div className={styles.imageWrap}>
                   <Image
                     src={t.image}
@@ -79,7 +81,7 @@ export default function WeekendsPage() {
                   <WishlistButton
                     className={styles.heartBtn}
                     item={{
-                      id: `weekend:${t.id}`,
+                      id: `weekend:${tid}`,
                       kind: "weekend",
                       name: t.name,
                       subtitle: t.subtitle,
@@ -105,7 +107,8 @@ export default function WeekendsPage() {
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -4,9 +4,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "./Hero.module.css";
 
-const HERO_VIDEO =
-  "https://res.cloudinary.com/dyxxkrq8r/video/upload/v1779188622/Hero_MHB_Video_aicsk2.mp4";
-
 function SearchIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -16,9 +13,15 @@ function SearchIcon() {
   );
 }
 
-export default function Hero() {
+export default function Hero({ data }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+
+  const videoUrl = data?.videoUrl;
+  const accent = data?.accentWord || "Holiday";
+  const headline = data?.headline; // e.g. "Plan your next Holiday"
+  const lede = data?.subheading || "Handpicked trips, ready when you are.";
+  const placeholder = data?.searchPlaceholder || "Where do you want to go?";
 
   function submit(e) {
     e.preventDefault();
@@ -26,11 +29,24 @@ export default function Hero() {
     router.push(q ? `/destinations?where=${encodeURIComponent(q)}` : "/destinations");
   }
 
+  // Render the headline with the accent word highlighted; fall back to the
+  // built-in two-line layout when the CMS has no headline.
+  function renderHeadline() {
+    if (!headline) {
+      return (<>Plan your<br />next <span className={styles.accent}>Holiday</span>.</>);
+    }
+    if (accent && headline.includes(accent)) {
+      const [before, after] = headline.split(accent);
+      return (<>{before}<span className={styles.accent}>{accent}</span>{after}</>);
+    }
+    return headline;
+  }
+
   return (
     <section className={styles.hero}>
       <video
         className={styles.video}
-        src={HERO_VIDEO}
+        src={videoUrl}
         autoPlay
         loop
         muted
@@ -41,15 +57,9 @@ export default function Hero() {
       <div className={styles.overlay} aria-hidden />
 
       <div className={styles.content}>
-        <h1 className={styles.headline}>
-          Plan your
-          <br />
-          next <span className={styles.accent}>Holiday</span>.
-        </h1>
+        <h1 className={styles.headline}>{renderHeadline()}</h1>
 
-        <p className={styles.lede}>
-          Handpicked trips, ready when you are.
-        </p>
+        <p className={styles.lede}>{lede}</p>
 
         <form
           className={styles.searchBar}
@@ -63,7 +73,7 @@ export default function Hero() {
           <input
             className={styles.searchInput}
             type="text"
-            placeholder="Where do you want to go?"
+            placeholder={placeholder}
             autoComplete="off"
             aria-label="Search trips and destinations"
             value={query}

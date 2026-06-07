@@ -1,94 +1,67 @@
 "use client";
 
+// Auth context — now backed by the backend-mhb API (JWT). The public surface
+// (user, isLoggedIn, hydrated, initial, login, signup, logout) is unchanged, so
+// the login/account/header components keep working. login() and signup() are
+// now async and resolve to { ok, error? }.
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { auth as authApi, getToken } from "../lib/api";
 
 const AuthContext = createContext(null);
-const STORAGE_KEY = "mhb_auth_v1";
-const USERS_KEY = "mhb_users_v1";
 
-function readUsers() {
-  if (typeof window === "undefined") return {};
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
-  } catch {
-    return {};
-  }
-}
-function writeUsers(map) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(USERS_KEY, JSON.stringify(map));
-}
-function readSession() {
-  if (typeof window === "undefined") return null;
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-  } catch {
-    return null;
-  }
-}
-function writeSession(user) {
-  if (typeof window === "undefined") return;
-  if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-  else localStorage.removeItem(STORAGE_KEY);
-}
+// Seeded demo account (lives in the backend now). Shown as a hint on /login.
+export const DEMO_CREDENTIALS = {
+  email: "test@gmail.com",
+  password: "Test@71922",
+};
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [hydrated, setHydrated] = useState(false);
 
+  // Restore the session from a stored token on first mount.
   useEffect(() => {
-    setUser(readSession());
-    setHydrated(true);
-    function onStorage(e) {
-      if (e.key === STORAGE_KEY) setUser(readSession());
-    }
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    let cancelled = false;
+    (async () => {
+      if (!getToken()) { setHydrated(true); return; }
+      try {
+        const { user: me } = await authApi.me();
+        if (!cancelled) setUser(me);
+      } catch {
+        authApi.logout(); // token expired/invalid
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  const signup = useCallback(({ name, email, password }) => {
-    const e = (email || "").trim().toLowerCase();
-    if (!name || !e || !password) {
-      return { ok: false, error: "Please fill every field." };
+  const signup = useCallback(async ({ name, email, password }) => {
+    if (!name || !email || !password) return { ok: false, error: "Please fill every field." };
+    if (password.length < 6) return { ok: false, error: "Password needs at least 6 characters." };
+    try {
+      const { user: me } = await authApi.signup({ name: name.trim(), email, password });
+      setUser(me);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || "Couldn't create your account." };
     }
-    if (password.length < 6) {
-      return { ok: false, error: "Password needs at least 6 characters." };
-    }
-    const users = readUsers();
-    if (users[e]) {
-      return { ok: false, error: "An account with this email already exists." };
-    }
-    const account = {
-      id: `u_${Date.now().toString(36)}`,
-      name: name.trim(),
-      email: e,
-      password, // demo only — never store plaintext passwords in real apps
-      createdAt: Date.now(),
-    };
-    users[e] = account;
-    writeUsers(users);
-    const session = { id: account.id, name: account.name, email: account.email };
-    writeSession(session);
-    setUser(session);
-    return { ok: true };
   }, []);
 
-  const login = useCallback(({ email, password }) => {
-    const e = (email || "").trim().toLowerCase();
-    if (!e || !password) return { ok: false, error: "Email and password required." };
-    const users = readUsers();
-    const account = users[e];
-    if (!account || account.password !== password) {
-      return { ok: false, error: "Email or password doesn't match." };
+  const login = useCallback(async ({ email, password }) => {
+    if (!email || !password) return { ok: false, error: "Email and password required." };
+    try {
+      const { user: me } = await authApi.login({ email, password });
+      setUser(me);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || "Email or password doesn't match." };
     }
-    const session = { id: account.id, name: account.name, email: account.email };
-    writeSession(session);
-    setUser(session);
-    return { ok: true };
   }, []);
 
   const logout = useCallback(() => {
-    writeSession(null);
+    authApi.logout();
     setUser(null);
   }, []);
 
