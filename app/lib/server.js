@@ -35,11 +35,15 @@ export async function getContent(key) {
   const r = await apiGet(`/content/${key}`);
   return r?.data || null;
 }
+// Collections behind the Stories / Moments sections. Migrated docs carry an
+// `order` field; admin-added docs don't and float to the front (newest first).
+const byOrder = (a, b) => (a.order ?? -1) - (b.order ?? -1);
+
 export async function getMoments() {
-  const r = await apiGet("/moments");
-  return r?.data || [];
+  const r = await apiGet("/moments?limit=200");
+  return (r?.data || []).map((m) => ({ id: m._id, ...m })).sort(byOrder);
 }
 export async function getTestimonials() {
-  const r = await apiGet("/testimonials");
-  return r?.data || [];
+  const r = await apiGet("/testimonials?limit=200");
+  return (r?.data || []).map((t) => ({ id: t._id, ...t })).sort(byOrder);
 }

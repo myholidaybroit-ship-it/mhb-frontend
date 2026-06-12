@@ -1,7 +1,7 @@
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import MomentsPage from "./MomentsPage";
-import { getContent, getTestimonials } from "../lib/server";
+import { getMoments, getTestimonials } from "../lib/server";
 
 export const metadata = {
   title: "Moments · MyHolidayBro",
@@ -10,9 +10,7 @@ export const metadata = {
 };
 
 export default async function Page() {
-  const home = await getContent("home");
-  const moments = home?.moments?.items || [];
-  const videos = await getTestimonials();
+  const [moments, videos] = await Promise.all([getMoments(), getTestimonials()]);
   return (
     <>
       <Header />
