@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useWishlist } from "../../components/WishlistContext";
+import MonthPicker from "../../components/MonthPicker";
 import { forms } from "../../lib/api";
 import { img } from "../../lib/img";
 import styles from "./TripDetail.module.css";
@@ -356,6 +357,8 @@ export default function TripDetail({ dest, content, related = [] }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [travelMonth, setTravelMonth] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   function handleEnquirySubmit(e) {
@@ -367,6 +370,8 @@ export default function TripDetail({ dest, content, related = [] }) {
         name,
         email,
         phone,
+        city,
+        travelMonth,
         destination: dest.name,
         package: pkg ? `${pkg.name} — ${pkg.days}D · ${pkg.price}` : undefined,
         adults,
@@ -1052,7 +1057,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                     className={styles.ctaGhost}
                     onClick={() => {
                       setSubmitted(false);
-                      setName(""); setEmail(""); setPhone("");
+                      setName(""); setEmail(""); setPhone(""); setCity(""); setTravelMonth("");
                     }}
                   >
                     Send another enquiry
@@ -1112,6 +1117,28 @@ export default function TripDetail({ dest, content, related = [] }) {
                     placeholder="+91 9XXXXXXXXX"
                     className={styles.formInput}
                   />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="enq-city" className={styles.formLabel}>
+                    <span className={styles.formLabelIcon}>{I.pin ? I.pin(12) : I.compass(12)}</span> Your city
+                  </label>
+                  <input
+                    id="enq-city"
+                    type="text"
+                    autoComplete="address-level2"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Mumbai"
+                    className={styles.formInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="enq-month" className={styles.formLabel}>
+                    <span className={styles.formLabelIcon}>{I.calendar ? I.calendar(12) : I.compass(12)}</span> Planning to travel in
+                  </label>
+                  <MonthPicker id="enq-month" value={travelMonth} onChange={setTravelMonth} />
                 </div>
 
                 <div className={styles.formGroup}>

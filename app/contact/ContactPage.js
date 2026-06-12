@@ -51,31 +51,6 @@ const I = {
   cap: sv(<><path d="M22 10 12 4 2 10l10 6 10-6Z" /><path d="M6 12v5c2 1.5 4 2 6 2s4-.5 6-2v-5" /></>),
 };
 
-const TRIP_TYPES = [
-  "Beach holiday",
-  "Honeymoon",
-  "Family trip",
-  "Adventure",
-  "Weekend getaway",
-  "Corporate offsite",
-  "Group / Friends trip",
-  "Custom · Other",
-];
-
-const DESTINATIONS = [
-  "Maldives",
-  "Bali",
-  "Thailand",
-  "Singapore + Malaysia",
-  "Vietnam",
-  "Dubai",
-  "Europe",
-  "Kashmir",
-  "Ladakh",
-  "Andaman",
-  "Goa",
-  "Not sure yet · Suggest me",
-];
 
 export default function ContactPage({ content, settings }) {
   const heroCollage = content?.heroCollage || [];
@@ -84,14 +59,10 @@ export default function ContactPage({ content, settings }) {
 
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     phone: "",
-    tripType: "",
-    destination: "",
     query: "",
-    optIn: true,
   });
 
   function update(key, value) {
@@ -103,14 +74,10 @@ export default function ContactPage({ content, settings }) {
     forms
       .enquiry({
         type: "contact",
-        firstName: form.firstName,
-        lastName: form.lastName,
+        name: form.name,
         email: form.email,
         phone: form.phone,
-        category: form.tripType,
-        destination: form.destination,
         message: form.query,
-        marketing: form.optIn,
       })
       .catch((err) => console.error("Contact enquiry failed:", err.message));
     setSubmitted(true);
@@ -276,7 +243,7 @@ export default function ContactPage({ content, settings }) {
               {submitted ? (
                 <div className={styles.successCard}>
                   <span className={styles.successEmoji} aria-hidden>🎒</span>
-                  <strong>Got it, {form.firstName || "traveller"} — packing your reply now.</strong>
+                  <strong>Got it, {form.name || "traveller"} — packing your reply now.</strong>
                   <p>
                     A trip captain will WhatsApp you on{" "}
                     <strong>{form.phone || "your number"}</strong> shortly. Meanwhile, scroll down
@@ -287,16 +254,7 @@ export default function ContactPage({ content, settings }) {
                     className={styles.successReset}
                     onClick={() => {
                       setSubmitted(false);
-                      setForm({
-                        firstName: "",
-                        lastName: "",
-                        email: "",
-                        phone: "",
-                        tripType: "",
-                        destination: "",
-                        query: "",
-                        optIn: true,
-                      });
+                      setForm({ name: "", email: "", phone: "", query: "" });
                     }}
                   >
                     Send another enquiry
@@ -306,25 +264,15 @@ export default function ContactPage({ content, settings }) {
                 <form className={styles.form} onSubmit={onSubmit} noValidate>
                   <div className={styles.formRow}>
                     <label className={styles.field}>
-                      <span>First name *</span>
+                      <span>Your name *</span>
                       <input
                         type="text"
                         required
-                        value={form.firstName}
-                        onChange={(e) => update("firstName", e.target.value)}
+                        autoComplete="name"
+                        value={form.name}
+                        onChange={(e) => update("name", e.target.value)}
                       />
                     </label>
-                    <label className={styles.field}>
-                      <span>Last name</span>
-                      <input
-                        type="text"
-                        value={form.lastName}
-                        onChange={(e) => update("lastName", e.target.value)}
-                      />
-                    </label>
-                  </div>
-
-                  <div className={styles.formRow}>
                     <label className={styles.field}>
                       <span>Email *</span>
                       <input
@@ -334,6 +282,9 @@ export default function ContactPage({ content, settings }) {
                         onChange={(e) => update("email", e.target.value)}
                       />
                     </label>
+                  </div>
+
+                  <div className={styles.formRow}>
                     <label className={styles.field}>
                       <span>Phone *</span>
                       <div className={styles.phoneRow}>
@@ -349,53 +300,15 @@ export default function ContactPage({ content, settings }) {
                     </label>
                   </div>
 
-                  <div className={styles.formRow}>
-                    <label className={styles.field}>
-                      <span>What kind of trip? *</span>
-                      <select
-                        required
-                        value={form.tripType}
-                        onChange={(e) => update("tripType", e.target.value)}
-                      >
-                        <option value="" disabled>Select a category</option>
-                        {TRIP_TYPES.map((t) => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className={styles.field}>
-                      <span>Where to?</span>
-                      <select
-                        value={form.destination}
-                        onChange={(e) => update("destination", e.target.value)}
-                      >
-                        <option value="">Select a destination</option>
-                        {DESTINATIONS.map((d) => (
-                          <option key={d} value={d}>{d}</option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-
                   <label className={`${styles.field} ${styles.fieldFull}`}>
-                    <span>Your message</span>
+                    <span>Your message *</span>
                     <textarea
                       rows={4}
-                      placeholder="Travel dates, group size, anything we should know…"
+                      required
+                      placeholder="Travel dates, group size, where you want to go — anything we should know…"
                       value={form.query}
                       onChange={(e) => update("query", e.target.value)}
                     />
-                  </label>
-
-                  <label className={styles.optIn}>
-                    <input
-                      type="checkbox"
-                      checked={form.optIn}
-                      onChange={(e) => update("optIn", e.target.checked)}
-                    />
-                    <span>
-                      Keep me updated with offers, trips and travel inspiration via email, SMS and WhatsApp.
-                    </span>
                   </label>
 
                   <button type="submit" className={styles.submitBtn}>

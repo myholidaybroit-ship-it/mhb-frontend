@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import WishlistButton from "../../components/WishlistButton";
+import MonthPicker from "../../components/MonthPicker";
 import styles from "./WeekendDetail.module.css";
 import { forms } from "../../lib/api";
 
@@ -91,7 +92,7 @@ export default function WeekendDetail({ trip, content, related = [] }) {
   const [openDay, setOpenDay] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", city: "", travelMonth: "" });
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIdx, setGalleryIdx] = useState(0);
   const itinerary = defaultItinerary(trip);
@@ -106,6 +107,8 @@ export default function WeekendDetail({ trip, content, related = [] }) {
         name: form.name,
         email: form.email,
         phone: form.phone,
+        city: form.city,
+        travelMonth: form.travelMonth,
         trip: trip.name,
         price: trip.salePrice,
         channel: "Callback",
@@ -333,6 +336,14 @@ export default function WeekendDetail({ trip, content, related = [] }) {
                     <label className={styles.field}>
                       <span>Phone</span>
                       <input type="tel" required placeholder="+91 98xxx xxxxx" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Your city</span>
+                      <input type="text" placeholder="Mumbai" value={form.city} onChange={(e) => update("city", e.target.value)} />
+                    </label>
+                    <label className={styles.field}>
+                      <span>Planning to travel in</span>
+                      <MonthPicker value={form.travelMonth} onChange={(v) => update("travelMonth", v)} />
                     </label>
                     <button type="submit" className={styles.bookBtn}>
                       Request a callback
