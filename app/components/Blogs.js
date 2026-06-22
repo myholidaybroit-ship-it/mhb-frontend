@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./Blogs.module.css";
 
 function ArrowIcon() {
@@ -10,9 +11,41 @@ function ArrowIcon() {
   );
 }
 
-export default function Blogs({ data }) {
-  const FEAT = data?.featured || {};
-  const posts = data?.posts || [];
+function fmtDate(iso) {
+  if (!iso) return "";
+  try {
+    return `Published ${new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`;
+  } catch {
+    return "";
+  }
+}
+
+// Normalise a real blog doc → the card shape this section renders.
+function toCard(post) {
+  return {
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    image: post.coverImage,
+    date: fmtDate(post.publishedAt),
+    read: post.readTime || "",
+    href: `/blog/${post.slug}`,
+  };
+}
+
+export default function Blogs({ data, posts = [] }) {
+  // Prefer real, published posts from the API; fall back to the seeded home
+  // content so the section never renders empty.
+  const live = (posts || []).map(toCard);
+  const featured = live.length
+    ? live[0]
+    : { ...(data?.featured || {}), href: "/blog" };
+  const cards = live.length
+    ? live.slice(1, 4)
+    : (data?.posts || []).map((p) => ({ ...p, href: "/blog" }));
+
+  if (!featured?.title && cards.length === 0) return null;
+
   return (
     <section className={styles.section} id="blogs">
       <div className={styles.container}>
@@ -25,16 +58,12 @@ export default function Blogs({ data }) {
 
         <div className={styles.grid}>
           <div className={styles.leftCol}>
-            {posts.map((p) => (
-              <a key={p.id} href="#" className={styles.smallCard}>
+            {cards.map((p) => (
+              <Link key={p.slug || p.title} href={p.href} className={styles.smallCard}>
                 <div className={styles.smallImageWrap}>
-                  <Image
-                    src={p.image}
-                    alt=""
-                    fill
-                    sizes="200px"
-                    className={styles.smallImage}
-                  />
+                  {p.image && (
+                    <Image src={p.image} alt="" fill sizes="200px" className={styles.smallImage} />
+                  )}
                 </div>
                 <div className={styles.smallBody}>
                   <div className={styles.metaRow}>
@@ -43,15 +72,15 @@ export default function Blogs({ data }) {
                   </div>
                   <h3 className={styles.smallTitle}>{p.title}</h3>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
 
-          <a href="#" className={styles.featured}>
+          <Link href={featured.href || "/blog"} className={styles.featured}>
             <div className={styles.featuredImageWrap}>
-              {FEAT.image && (
+              {featured.image && (
                 <Image
-                  src={FEAT.image}
+                  src={featured.image}
                   alt=""
                   fill
                   sizes="(max-width: 900px) 100vw, 50vw"
@@ -65,20 +94,20 @@ export default function Blogs({ data }) {
             </div>
             <div className={styles.featuredBody}>
               <div className={styles.metaRow}>
-                <span>{FEAT.date}</span>
-                <span>{FEAT.read}</span>
+                <span>{featured.date}</span>
+                <span>{featured.read}</span>
               </div>
-              <h3 className={styles.featuredTitle}>{FEAT.title}</h3>
-              <p className={styles.featuredExcerpt}>{FEAT.excerpt}</p>
+              <h3 className={styles.featuredTitle}>{featured.title}</h3>
+              <p className={styles.featuredExcerpt}>{featured.excerpt}</p>
             </div>
-          </a>
+          </Link>
         </div>
 
         <div className={styles.viewAllWrap}>
-          <a href="#" className={styles.viewAll}>
+          <Link href="/blog" className={styles.viewAll}>
             View all blogs
             <ArrowIcon />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

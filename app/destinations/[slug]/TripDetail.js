@@ -7,6 +7,7 @@ import { useWishlist } from "../../components/WishlistContext";
 import MonthPicker from "../../components/MonthPicker";
 import { forms } from "../../lib/api";
 import { img } from "../../lib/img";
+import { resolvePackages } from "../../lib/packages";
 import styles from "./TripDetail.module.css";
 
 /* ─────────── Icons ─────────── */
@@ -322,12 +323,8 @@ export default function TripDetail({ dest, content, related = [] }) {
   // Catalog destinations may ship without packaged trips / itinerary / overview.
   // Derive safe defaults so every detail page renders fully and never crashes on
   // thin data (the admin can refine these per destination later).
-  const packages = dest.packages?.length
-    ? dest.packages
-    : [
-        { name: `${dest.name} Getaway`, days: 5, nights: 4, price: dest.fromPrice || "On request", route: dest.name, tag: (dest.idealFor || "Trip").split("·")[0].trim() },
-        { name: `${dest.name} Explorer`, days: 7, nights: 6, price: dest.fromPrice || "On request", route: dest.name, tag: "Explorer" },
-      ];
+  // Every package — real or placeholder — gets a slug and its own detail page.
+  const packages = resolvePackages(dest);
   const itinerary = dest.itinerary || [];
   const overview = dest.overview || [];
   const highlights = dest.highlights || [];
@@ -799,6 +796,14 @@ export default function TripDetail({ dest, content, related = [] }) {
                             </span>
                           </span>
                         </div>
+
+                        <Link
+                          href={`/destinations/${dest.slug}/${p.slug}`}
+                          className={styles.pkgDetailsLink}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View full details {I.chevRight(13)}
+                        </Link>
                       </div>
                     </article>
                   );

@@ -12,15 +12,15 @@ import Stories from "./components/Stories";
 import Travelers from "./components/Travelers";
 import Weekends from "./components/Weekends";
 import WhyUs from "./components/WhyUs";
-import { getContent, getWeekends, getMoments, getTestimonials } from "./lib/server";
+import { getContent, getWeekends, getMoments, getTestimonials, getDestinations, getBlogs } from "./lib/server";
 
 // Home content is served live from the CMS (`home` singleton) + the weekends,
 // testimonials and moments collections — so the admin's Weekend Trips and
 // Moments pages drive these sections directly. Each section receives its slice
 // and falls back to built-in defaults if missing, so the page never degrades.
 export default async function Home() {
-  const [home, weekends, testimonials, moments, settings] = await Promise.all([
-    getContent("home"), getWeekends(), getTestimonials(), getMoments(), getContent("settings"),
+  const [home, weekends, testimonials, moments, settings, destinations, blogs] = await Promise.all([
+    getContent("home"), getWeekends(), getTestimonials(), getMoments(), getContent("settings"), getDestinations(), getBlogs(),
   ]);
   const h = home || {};
   const s = settings || {};
@@ -28,7 +28,7 @@ export default async function Home() {
     <>
       <Header />
       <main>
-        <Hero data={h.hero} />
+        <Hero data={h.hero} destinations={destinations} />
         <Travelers data={h.travelers} />
         <Bookings data={h.bookings} />
         <Packages data={h.packages} />
@@ -43,7 +43,7 @@ export default async function Home() {
         <Partners data={h.partners} />
         <WhyUs data={h.whyUs} />
         <FeaturedOn data={h.featuredOn} />
-        <Blogs data={h.blogs} />
+        <Blogs data={h.blogs} posts={blogs} />
         <Newsletter data={h.newsletter} />
       </main>
       <Footer />

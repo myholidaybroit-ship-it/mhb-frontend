@@ -1,6 +1,7 @@
 node_modules
 .next
 out
+.env
 .env*.local
 admin/
 admin/.env*.local

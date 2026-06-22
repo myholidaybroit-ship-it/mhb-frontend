@@ -2,13 +2,17 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
-  overflow: hidden;
+  /* No overflow:hidden — the live-search dropdown needs to spill past the
+     hero. object-fit:cover already clips the video to its box. */
   background: #0a0a0a;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   isolation: isolate;
+  /* Lift the whole hero (and its dropdown) above the sections below so the
+     results never paint underneath the next section. */
+  z-index: 5;
   padding-top: 96px;
 }
 
@@ -63,10 +67,15 @@
   white-space: nowrap;
 }
 
-.searchBar {
+.searchWrap {
+  position: relative;
   margin-top: 18px;
   width: 100%;
   max-width: 640px;
+}
+
+.searchBar {
+  width: 100%;
   background: #ffffff;
   border-radius: var(--radius-pill);
   display: flex;
@@ -74,6 +83,127 @@
   padding: 8px 8px 8px 22px;
   gap: 12px;
   color: var(--color-ink);
+}
+
+/* ── Live results dropdown ── */
+.results {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  padding: 8px;
+  max-height: min(58vh, 440px);
+  overflow-y: auto;
+  color: var(--color-ink);
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background-color 0.12s ease;
+}
+
+.resultRow:hover,
+.resultRow:focus-visible {
+  background: #f4f4f5;
+  outline: none;
+}
+
+.resultThumb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.resultThumb img {
+  object-fit: cover;
+}
+
+.resultText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.resultName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resultMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resultRegion {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  background: #f4f4f5;
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+
+.resultsAll {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px;
+  border: none;
+  border-top: 1px solid #ececed;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-ink);
+  text-align: center;
+  border-radius: 0 0 12px 12px;
+}
+
+.resultsAll:hover {
+  background: #f4f4f5;
+}
+
+.resultsEmpty {
+  padding: 18px 14px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
 }
 
 .searchIcon {

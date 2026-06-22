@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "../components/AuthContext";
 import { useWishlist } from "../components/WishlistContext";
 import styles from "./WishlistPage.module.css";
 
@@ -23,7 +22,6 @@ function HeartIcon() {
 
 export default function WishlistPage() {
   const { items, hydrated, remove, clear } = useWishlist();
-  const { isLoggedIn } = useAuth();
 
   if (!hydrated) {
     return (
@@ -58,9 +56,7 @@ export default function WishlistPage() {
             <p className={styles.sub}>
               {items.length === 0
                 ? "Tap the heart on any package, weekend trip or destination to save it here."
-                : !isLoggedIn
-                ? "Saved locally on this device. Create an account to access your wishlist from anywhere."
-                : "Saved to your account. Share the list with a trip captain when you're ready."}
+                : "Saved on this device. Share the list with a trip captain whenever you're ready."}
             </p>
           </div>
 
@@ -143,18 +139,6 @@ export default function WishlistPage() {
           </div>
         )}
 
-        {!isLoggedIn && items.length > 0 && (
-          <div className={styles.upsell}>
-            <div>
-              <strong>Save this list across devices</strong>
-              <p>Create a free MHB account so your wishlist syncs to your phone and laptop.</p>
-            </div>
-            <div className={styles.upsellActions}>
-              <Link href="/signup?next=/wishlist" className={styles.ctaPrimary}>Sign up</Link>
-              <Link href="/login?next=/wishlist" className={styles.ctaGhost}>Log in</Link>
-            </div>
-          </div>
-        )}
       </div>
     </main>
   );

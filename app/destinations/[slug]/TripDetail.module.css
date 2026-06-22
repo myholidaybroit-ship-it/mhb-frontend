@@ -474,6 +474,21 @@ button.galTile {
   background: var(--color-surface);
 }
 
+/* "View full details" link to the package's own SEO page. */
+.pkgDetailsLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink);
+  text-decoration: none;
+  border-bottom: 1.5px solid var(--color-accent);
+  padding-bottom: 1px;
+}
+.pkgDetailsLink:hover { color: var(--color-accent-hover); }
+
 .pkgMetaRow {
   display: flex;
   align-items: center;

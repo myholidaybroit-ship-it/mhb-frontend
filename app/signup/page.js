@@ -1,18 +1,7 @@
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import SignupPage from "./SignupPage";
-
-export const metadata = {
-  title: "Sign up · MyHolidayBro",
-  description: "Create your MyHolidayBro account to save trips, manage wishlists and unlock insider deals.",
-};
+// Customer authentication is disabled for now. The SignupPage component is kept
+// for easy re-enable, but the route redirects home so it's gone from the UI.
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return (
-    <>
-      <Header />
-      <SignupPage />
-      <Footer />
-    </>
-  );
+  redirect("/");
 }
