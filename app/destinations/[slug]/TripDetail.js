@@ -327,7 +327,12 @@ export default function TripDetail({ dest, content, related = [] }) {
   const packages = resolvePackages(dest);
   const itinerary = dest.itinerary || [];
   const overview = dest.overview || [];
-  const highlights = dest.highlights || [];
+  // Highlights come in two shapes: legacy destinations store plain strings,
+  // while the admin form saves { text, icon } objects. Normalize to strings so
+  // the cards render either way (rendering an object as a child crashes React).
+  const highlights = (dest.highlights || [])
+    .map((h) => (typeof h === "string" ? h : h?.text || ""))
+    .filter(Boolean);
 
   const [pkgIdx, setPkgIdx] = useState(0);
   const [adults, setAdults] = useState(2);

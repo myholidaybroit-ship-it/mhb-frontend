@@ -104,7 +104,12 @@ export default function PackageDetail({ dest, pkg, content }) {
 
   const overview =
     pkg.overview?.length ? pkg.overview : dest.overview || [];
-  const highlights = dest.highlights || [];
+  // Highlights come in two shapes: legacy destinations store plain strings,
+  // while the admin form saves { text, icon } objects. Normalize to strings so
+  // they render either way (rendering an object as a child crashes React).
+  const highlights = (dest.highlights || [])
+    .map((h) => (typeof h === "string" ? h : h?.text || ""))
+    .filter(Boolean);
 
   // Other packages in this destination, for cross-linking.
   const siblings = useMemo(
