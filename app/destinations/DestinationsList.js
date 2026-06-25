@@ -132,7 +132,6 @@ const SORTS = [
   { id: "popular", label: "Most popular" },
   { id: "price-asc", label: "Price: low to high" },
   { id: "price-desc", label: "Price: high to low" },
-  { id: "rating", label: "Top rated" },
   { id: "duration-asc", label: "Shortest first" },
 ];
 
@@ -450,16 +449,13 @@ export default function DestinationsList({ destinations }) {
       case "price-desc":
         list.sort((a, b) => priceNumber(b.fromPrice) - priceNumber(a.fromPrice));
         break;
-      case "rating":
-        list.sort((a, b) => b.rating - a.rating);
-        break;
       case "duration-asc":
         list.sort(
           (a, b) => (a.packages[0]?.days || 0) - (b.packages[0]?.days || 0)
         );
         break;
       default:
-        list.sort((a, b) => b.reviews - a.reviews);
+        break;
     }
     return list;
   }, [where, region, styleFilters, maxDays, maxPrice, sort, month]);
@@ -1027,13 +1023,6 @@ export default function DestinationsList({ destinations }) {
                         <div className={styles.resultMetaLine}>
                           <span className={styles.metaChip}>
                             <Clock /> {pkg?.days || 5} days
-                          </span>
-                          <span className={styles.metaChip}>
-                            <Star size={13} />
-                            <strong>{d.rating.toFixed(1)}</strong>
-                            <span className={styles.resultRatingSub}>
-                              ({d.reviews})
-                            </span>
                           </span>
                           {d.packages.length > 1 && (
                             <span className={styles.metaChip}>

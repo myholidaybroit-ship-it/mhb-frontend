@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import QuoteForm from "../../../components/QuoteForm";
+import IncludedExcluded from "../../../components/IncludedExcluded";
+import Moments from "../../../components/Moments";
+import { TravelIcon } from "../../../lib/travelIcons";
 import { useWishlist } from "../../../components/WishlistContext";
 import { img } from "../../../lib/img";
 import { withPackageSlugs } from "../../../lib/packages";
@@ -47,6 +50,11 @@ const Icon = {
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
     </svg>
   ),
+  chevDown: (s = 18) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  ),
   heart: (active) => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill={active ? "#dc2626" : "none"} stroke={active ? "#dc2626" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -67,28 +75,16 @@ function pickSrc(maybeUrl, key, w = 1200, h = 800) {
   return img(key, w, h);
 }
 
-export default function PackageDetail({ dest, pkg, content }) {
+export default function PackageDetail({ dest, pkg, content, moments = [] }) {
   const nights = pkg.nights ?? Math.max(0, (pkg.days || 1) - 1);
 
-  // Itinerary: prefer the package's own day-by-day, else the destination's,
-  // padded out to the package length so the count matches what's sold.
-  const itinDays = useMemo(() => {
-    const source =
-      (pkg.itinerary?.length ? pkg.itinerary : dest.itinerary) || [];
-    const base = source.slice(0, pkg.days).map((d) => ({ ...d }));
-    while (base.length < (pkg.days || base.length)) {
-      const day = base.length + 1;
-      const last = day === pkg.days;
-      base.push({
-        day,
-        title: last ? "Departure" : "Leisure & optional add-ons",
-        desc: last
-          ? "Breakfast at the hotel and your transfer to the airport."
-          : "Free day for optional add-ons, spa or shopping — your advisor suggests options to suit you.",
-      });
-    }
-    return base;
-  }, [dest, pkg]);
+  // Strictly the package's OWN day-by-day itinerary — no destination fallback and
+  // no synthesized filler days. If the package has none set in the admin, the
+  // section is hidden (add days under Itinerary → this package in the admin).
+  const itinDays = useMemo(
+    () => (pkg.itinerary || []).filter((d) => d && (d.title || d.desc || (d.points || []).length)),
+    [pkg]
+  );
 
   const inclusions = pkg.inclusions?.length
     ? pkg.inclusions
@@ -118,7 +114,6 @@ export default function PackageDetail({ dest, pkg, content }) {
   // destination (no cross-fallback) so each page can show different content.
   const goodToKnow = pkg.goodToKnow || [];
   const faqs = (pkg.faqs || []).slice(0, 6);
-  const stories = content?.travelDiaries || [];
 
   // Other packages in this destination, for cross-linking.
   const siblings = useMemo(
@@ -158,6 +153,7 @@ export default function PackageDetail({ dest, pkg, content }) {
   }
 
   const [openFaq, setOpenFaq] = useState(0);
+  const [openDay, setOpenDay] = useState(0);
 
   // All packages in this destination (for the quote form's package dropdown),
   // with the current package preselected.
@@ -192,9 +188,6 @@ export default function PackageDetail({ dest, pkg, content }) {
             <span>{Icon.pin(15)} {pkg.route || dest.name}</span>
             <span>{Icon.clock(15)} {pkg.days}D / {nights}N</span>
             <span>{Icon.cal(15)} Best: {dest.bestTime || "Year-round"}</span>
-            {dest.rating ? (
-              <span>{Icon.star(14)} {Number(dest.rating).toFixed(1)} ({dest.reviews || 0})</span>
-            ) : null}
           </div>
         </div>
       </section>
@@ -242,44 +235,51 @@ export default function PackageDetail({ dest, pkg, content }) {
               </Block>
             )}
 
+            {itinDays.length > 0 && (
             <Block title="Day-by-day itinerary" subtitle={`${pkg.days} days / ${nights} nights`}>
-              <ol className={styles.itin}>
-                {itinDays.map((d, i) => (
-                  <li key={i} className={styles.itinRow}>
-                    <span className={styles.itinDay}>Day {d.day ?? i + 1}</span>
-                    <div className={styles.itinText}>
-                      <strong>{d.title}</strong>
-                      {d.desc && <p>{d.desc}</p>}
+              <div className={styles.itinAcc}>
+                {itinDays.map((d, i) => {
+                  const open = openDay === i;
+                  const points = (d.points || []).filter((p) => p && p.text);
+                  return (
+                    <div key={i} className={`${styles.itinItem} ${open ? styles.itinItemOpen : ""}`}>
+                      <button
+                        type="button"
+                        className={styles.itinHead}
+                        onClick={() => setOpenDay(open ? -1 : i)}
+                        aria-expanded={open}
+                      >
+                        <span className={styles.itinDayBadge}>Day {d.day ?? i + 1}</span>
+                        <span className={styles.itinHeadTitle}>{d.title}</span>
+                        <span className={styles.itinChev}>{Icon.chevDown(18)}</span>
+                      </button>
+                      {open && (
+                        <div className={styles.itinBody}>
+                          {d.desc && <p className={styles.itinDesc}>{d.desc}</p>}
+                          {points.length > 0 && (
+                            <ul className={styles.itinPoints}>
+                              {points.map((p, k) => (
+                                <li key={k}>
+                                  <span className={styles.itinPointIcon}>
+                                    <TravelIcon name={p.icon || "mappin"} size={15} />
+                                  </span>
+                                  {p.text}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </li>
-                ))}
-              </ol>
+                  );
+                })}
+              </div>
             </Block>
+            )}
 
             {(inclusions.length > 0 || exclusions.length > 0) && (
               <Block title="What's included">
-                <div className={styles.incGrid}>
-                  {inclusions.length > 0 && (
-                    <div>
-                      <h4 className={styles.incHead}>Included</h4>
-                      <ul className={styles.incList}>
-                        {inclusions.map((s, i) => (
-                          <li key={i}>{Icon.check(15)} <span>{s}</span></li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {exclusions.length > 0 && (
-                    <div>
-                      <h4 className={styles.incHead}>Not included</h4>
-                      <ul className={styles.incList}>
-                        {exclusions.map((s, i) => (
-                          <li key={i}>{Icon.cross(15)} <span>{s}</span></li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                <IncludedExcluded inclusions={inclusions} exclusions={exclusions} />
               </Block>
             )}
 
@@ -343,10 +343,14 @@ export default function PackageDetail({ dest, pkg, content }) {
                 <span className={styles.savings}>You save {inr(savings)}</span>
               )}
 
-              {pkg.pdf?.url && (
-                <a className={styles.pdfBtn} href={pkg.pdf.url} target="_blank" rel="noopener noreferrer">
-                  {Icon.download(15)} {pkg.pdf.name || "Download brochure"}
+              {pkg.pdf?.url ? (
+                <a className={styles.pdfBtn} href={pkg.pdf.url} target="_blank" rel="noopener noreferrer" download>
+                  {Icon.download(15)} {pkg.pdf.name || "Download package PDF"}
                 </a>
+              ) : (
+                <span className={styles.pdfUnavailable}>
+                  {Icon.download(15)} PDF not available for this package
+                </span>
               )}
             </div>
 
@@ -387,39 +391,12 @@ export default function PackageDetail({ dest, pkg, content }) {
           </div>
         )}
 
-        {/* Travel stories — read the story, then go for it */}
-        {stories.length > 0 && (
-          <div className={styles.stories}>
-            <div className={styles.storiesHead}>
-              <span className={styles.storiesKicker}>Travel diaries</span>
-              <h2 className={styles.storiesTitle}>Read the story, then go for it</h2>
-              <p className={styles.storiesLead}>Real postcards from MyHolidayBro travellers.</p>
-            </div>
-            <div className={styles.storiesGrid}>
-              {stories.slice(0, 6).map((t, i) => (
-                <article key={i} className={styles.storyCard}>
-                  <div className={styles.storyQuoteMark} aria-hidden>“</div>
-                  <p className={styles.storyBody}>{t.body}</p>
-                  <div className={styles.storyStars} aria-hidden>
-                    {Array.from({ length: 5 }).map((_, k) => (
-                      <span key={k}>{Icon.star(14)}</span>
-                    ))}
-                  </div>
-                  <footer className={styles.storyFoot}>
-                    <span className={styles.storyAvatar} style={{ background: t.accent || "#ffde5f" }}>
-                      {t.initials || (t.name || "?")[0]}
-                    </span>
-                    <div className={styles.storyMeta}>
-                      <strong>{t.name}</strong>
-                      <span>{[t.city, t.when].filter(Boolean).join(" · ")}</span>
-                    </div>
-                  </footer>
-                </article>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
+
+      {/* Traveller stories — the same section as the home page */}
+      {moments?.length > 0 && (
+        <Moments data={{ items: moments }} />
+      )}
     </main>
   );
 }

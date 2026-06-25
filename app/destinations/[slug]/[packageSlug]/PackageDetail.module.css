@@ -183,7 +183,7 @@
 .backLink:hover { color: var(--color-accent-hover); }
 
 /* ── Sidebar ── */
-.sidebar { position: sticky; top: 96px; }
+.sidebar { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 16px; }
 .priceCard {
   border: 1px solid #e5e7eb;
   border-radius: 20px;
@@ -236,6 +236,20 @@
   text-decoration: none;
 }
 .pdfBtn:hover { background: #f9fafb; }
+.pdfUnavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 11px;
+  border: 1px dashed var(--color-border, #e5e7eb);
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-ink-muted, #6b7280);
+  background: var(--color-surface-alt, #faf7ee);
+}
 
 .divider { height: 1px; background: #eee; margin: 20px 0; }
 
@@ -374,4 +388,61 @@
 @media (max-width: 560px) {
   .factsGrid { grid-template-columns: 1fr; }
   .storiesGrid { grid-template-columns: 1fr; }
+}
+
+/* ── Day-by-day itinerary accordion ── */
+.itinAcc { display: flex; flex-direction: column; gap: 10px; }
+.itinItem {
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+.itinItemOpen { border-color: var(--color-ink); }
+.itinHead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+.itinDayBadge {
+  flex: none;
+  background: var(--color-ink);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+.itinHeadTitle { flex: 1; font-weight: 800; font-size: 15.5px; color: var(--color-ink); letter-spacing: -0.01em; }
+.itinChev { flex: none; color: var(--color-ink-muted); transition: transform 0.2s ease; }
+.itinItemOpen .itinChev { transform: rotate(180deg); }
+.itinBody { padding: 0 18px 18px 18px; }
+.itinDesc { margin: 0 0 14px; color: var(--color-ink-muted); font-size: 14.5px; line-height: 1.65; }
+.itinPoints { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.itinPoints li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.itinPointIcon {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+  flex-shrink: 0;
 }

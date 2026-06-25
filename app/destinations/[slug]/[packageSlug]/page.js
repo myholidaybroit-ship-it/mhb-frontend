@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Footer from "../../../components/Footer";
 import Header from "../../../components/Header";
-import { getContent, loadPackage } from "../../../lib/server";
+import { getContent, loadPackage, getMoments } from "../../../lib/server";
 import PackageDetail from "./PackageDetail";
 
 // Strip "₹12,999" → 12999 for structured-data price fields.
@@ -46,9 +46,10 @@ export async function generateMetadata({ params }) {
 
 export default async function PackagePage({ params }) {
   const { slug, packageSlug } = await params;
-  const [data, content] = await Promise.all([
+  const [data, content, moments] = await Promise.all([
     loadPackage(slug, packageSlug),
     getContent("content"),
+    getMoments(),
   ]);
   if (!data?.package) notFound();
 
@@ -65,15 +66,6 @@ export default async function PackagePage({ params }) {
       `${pkg.name} — ${pkg.days} days / ${nights} nights in ${dest.name}.`,
     image: [pkg.image || dest.image].filter(Boolean),
     brand: { "@type": "Brand", name: "MyHolidayBro" },
-    ...(dest.rating
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: dest.rating,
-            reviewCount: dest.reviews || 1,
-          },
-        }
-      : {}),
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",
@@ -90,7 +82,7 @@ export default async function PackagePage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PackageDetail dest={dest} pkg={pkg} content={content} />
+      <PackageDetail dest={dest} pkg={pkg} content={content} moments={moments} />
       <Footer />
     </>
   );

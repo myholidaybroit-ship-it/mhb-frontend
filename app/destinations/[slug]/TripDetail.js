@@ -576,7 +576,9 @@ export default function TripDetail({ dest, content, related = [] }) {
   const inclusions = dest.inclusions?.length ? dest.inclusions : content?.inclusions || [];
   const exclusions = dest.exclusions?.length ? dest.exclusions : content?.exclusions || [];
   const usps = content?.usps || [];
-  const faqs = ((dest.faqs?.length ? dest.faqs : content?.faqs) || []).slice(0, 6);
+  // FAQs are per-destination — strictly the destination's own set, independent of
+  // packages and the global content FAQs (each destination has different FAQs).
+  const faqs = (dest.faqs || []).slice(0, 6);
 
   return (
     <main className={styles.page}>
@@ -655,10 +657,6 @@ export default function TripDetail({ dest, content, related = [] }) {
               <h1 className={styles.title}>{dest.name}</h1>
               <p className={styles.tagline}>{dest.tagline}</p>
               <div className={styles.titleMeta}>
-                <span className={styles.metaChip}>
-                  {I.star(14)} <strong>{dest.rating.toFixed(1)}</strong>
-                  <span className={styles.metaSub}>({dest.reviews})</span>
-                </span>
                 <span className={styles.metaChip}>{I.clock()} {pkg.days}D · {pkg.nights ?? pkg.days - 1}N</span>
                 <span className={styles.metaChip}>{I.pin(13)} {pkg.route}</span>
               </div>
@@ -799,13 +797,6 @@ export default function TripDetail({ dest, content, related = [] }) {
                               <span className={styles.pkgDiscountSm}>OFF</span>
                             </span>
                           )}
-
-                          <span className={styles.pkgRating}>
-                            <span className={styles.pkgStars} aria-hidden>★★★★★</span>
-                            <span className={styles.pkgRatingCount}>
-                              ({formatReviews(dest.reviews)})
-                            </span>
-                          </span>
                         </div>
 
                         <Link
@@ -884,52 +875,6 @@ export default function TripDetail({ dest, content, related = [] }) {
               </Link>
             )}
 
-            {/* Inclusions & exclusions — icon cards */}
-            <Section title="What's included">
-              <div className={styles.incExcGrid}>
-                <div className={`${styles.incBlock} ${styles.incBlockOn}`}>
-                  <header className={styles.incHead}><span>{I.check(16, "#16a34a")}</span> Included</header>
-                  <ul className={styles.incList}>
-                    {inclusions.map((s, i) => (
-                      <li key={s}>
-                        <span className={styles.incIcon}>{INCLUSION_ICONS[i % INCLUSION_ICONS.length]()}</span>
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className={`${styles.incBlock} ${styles.incBlockOff}`}>
-                  <header className={styles.incHead}><span>{I.x(16, "#dc2626")}</span> Not included</header>
-                  <ul className={styles.incList}>
-                    {exclusions.map((s, i) => (
-                      <li key={s}>
-                        <span className={styles.excIcon}>{EXCLUSION_ICONS[i % EXCLUSION_ICONS.length]()}</span>
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </Section>
-
-            {/* Cancellation — big-number cards */}
-            <Section title="Cancellation refunds">
-              <div className={styles.refundGrid}>
-                {REFUND_TIERS.map((r) => (
-                  <div key={r.window} className={`${styles.refundCard} ${styles[`tone_${r.tone}`]}`}>
-                    <span className={styles.refundPct}>{r.pct}<i>%</i></span>
-                    <span className={styles.refundLabel}>up to</span>
-                    <span className={styles.refundWindow}>{r.window}</span>
-                  </div>
-                ))}
-              </div>
-              <p className={styles.payNote}>
-                Written notice from the lead name is required. Amendment fees are non-refundable.
-                Exact charges may vary per booking — see{" "}
-                <Link href="/terms#cancellation" className={styles.policyLink}>Cancellation policy</Link>.
-              </p>
-            </Section>
-
             {/* Payment policy — 2 stage cards + methods */}
             <Section title="Payment policy">
               <div className={styles.payGrid}>
@@ -974,6 +919,7 @@ export default function TripDetail({ dest, content, related = [] }) {
             </Section>
 
             {/* FAQs */}
+            {faqs.length > 0 && (
             <Section title="Quick FAQs">
               <div className={styles.faqList}>
                 {faqs.map((f, i) => {
@@ -995,6 +941,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                 })}
               </div>
             </Section>
+            )}
           </div>
 
           {/* ─── Sticky enquiry form ─── */}
@@ -1220,12 +1167,6 @@ export default function TripDetail({ dest, content, related = [] }) {
                     <div className={styles.diaryQuoteMark} aria-hidden>“</div>
                     <p className={styles.diaryQuote}>{t.body}</p>
 
-                    <div className={styles.diaryStars} aria-hidden>
-                      {Array.from({ length: 5 }).map((_, k) => (
-                        <span key={k}>{I.star(14)}</span>
-                      ))}
-                    </div>
-
                     <footer className={styles.diaryFoot}>
                       <span
                         className={styles.diaryAvatar}
@@ -1295,7 +1236,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                   </div>
                   <div className={styles.relBody}>
                     <h4>{r.name}</h4>
-                    <span className={styles.relMeta}>{I.star(12)} {(r.rating ?? 4.8).toFixed(1)} · {p?.days || 5}D</span>
+                    <span className={styles.relMeta}>{I.clock(12)} {p?.days || 5}D</span>
                     <span className={styles.relPrice}>From <strong>{r.fromPrice}</strong></span>
                   </div>
                 </Link>

@@ -177,7 +177,6 @@ export default function WeekendDetail({ trip, content, related = [] }) {
             <div className={styles.heroMeta}>
               <span className={styles.metaPill}>{I.pin(13)} {trip.to}</span>
               <span className={styles.metaPill}>{I.clock(13)} {trip.days} days · {trip.nights} nights</span>
-              <span className={styles.metaPill}>{I.star(13)} <strong>{trip.rating.toFixed(1)}</strong> ({trip.reviews})</span>
               <span className={styles.metaPill}>Best · {trip.bestTime}</span>
             </div>
           </div>
