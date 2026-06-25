@@ -478,16 +478,24 @@ button.galTile {
 .pkgDetailsLink {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   align-self: flex-start;
   font-size: 13px;
   font-weight: 700;
   color: var(--color-ink);
   text-decoration: none;
-  border-bottom: 1.5px solid var(--color-accent);
-  padding-bottom: 1px;
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  padding: 9px 18px;
+  transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
 }
-.pkgDetailsLink:hover { color: var(--color-accent-hover); }
+.pkgDetailsLink:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
 
 .pkgMetaRow {
   display: flex;

@@ -147,7 +147,7 @@ export default function Hero({ data, destinations = [] }) {
                     >
                       <span className={styles.resultThumb}>
                         <Image
-                          src={img(d.imageKey, 120, 120)}
+                          src={img(d.image || d.imageKey, 120, 120)}
                           alt={d.name}
                           fill
                           sizes="44px"

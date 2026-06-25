@@ -302,3 +302,76 @@
   .incGrid { grid-template-columns: 1fr; }
   .siblingsGrid { grid-template-columns: 1fr; }
 }
+
+/* ── Who it's for ── */
+.whoRow { display: flex; flex-wrap: wrap; gap: 10px; }
+.whoPill {
+  display: inline-flex; align-items: center;
+  padding: 9px 16px; border-radius: 999px;
+  background: var(--color-surface-alt, #faf7ee);
+  border: 1px solid var(--color-border, #ebe7d8);
+  font-weight: 600; font-size: 14px; color: var(--color-ink);
+}
+
+/* ── Good to know ── */
+.factsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.factCard {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px; border-radius: 14px;
+  background: var(--color-surface-alt, #faf7ee);
+  border: 1px solid var(--color-border, #ebe7d8);
+}
+.factLabel { font-size: 12.5px; color: var(--color-ink-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.factValue { font-size: 15px; color: var(--color-ink); }
+
+/* ── Quick FAQs ── */
+.faqList { display: flex; flex-direction: column; gap: 10px; }
+.faqRow { border: 1px solid var(--color-border, #ebe7d8); border-radius: 14px; overflow: hidden; background: #fff; }
+.faqHead {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 18px; background: none; border: none; cursor: pointer;
+  font-weight: 600; font-size: 15px; color: var(--color-ink); text-align: left;
+}
+.faqIcon {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--color-accent, #ffde5f); color: var(--color-ink);
+  font-weight: 700; font-size: 16px; line-height: 1;
+}
+.faqOpen { border-color: var(--color-accent, #ffde5f); }
+.faqBody { margin: 0; padding: 0 18px 18px; color: var(--color-ink-muted); font-size: 14.5px; line-height: 1.6; }
+
+/* ── Travel stories ── */
+.stories { margin-top: 8px; padding-top: 40px; border-top: 1px solid var(--color-border, #ebe7d8); }
+.storiesHead { text-align: center; max-width: 600px; margin: 0 auto 28px; }
+.storiesKicker { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-ink-muted); margin-bottom: 8px; }
+.storiesTitle { font-size: 28px; font-weight: 900; letter-spacing: -.02em; color: var(--color-ink); margin: 0 0 8px; }
+.storiesLead { color: var(--color-ink-muted); font-size: 15px; margin: 0; }
+.storiesGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.storyCard {
+  position: relative; display: flex; flex-direction: column; gap: 12px;
+  padding: 24px 22px; border-radius: 18px;
+  background: var(--color-surface-alt, #faf7ee);
+  border: 1px solid var(--color-border, #ebe7d8);
+}
+.storyQuoteMark { font-size: 48px; line-height: .6; color: var(--color-accent, #ffde5f); font-weight: 900; }
+.storyBody { margin: 0; color: var(--color-ink); font-size: 15px; line-height: 1.6; flex: 1; }
+.storyStars { display: inline-flex; gap: 2px; }
+.storyFoot { display: flex; align-items: center; gap: 12px; }
+.storyAvatar {
+  flex: none; width: 40px; height: 40px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; color: var(--color-ink); font-size: 15px;
+}
+.storyMeta { display: flex; flex-direction: column; line-height: 1.3; }
+.storyMeta strong { font-size: 14.5px; color: var(--color-ink); }
+.storyMeta span { font-size: 12.5px; color: var(--color-ink-muted); }
+
+@media (max-width: 900px) {
+  .factsGrid { grid-template-columns: repeat(2, 1fr); }
+  .storiesGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .factsGrid { grid-template-columns: 1fr; }
+  .storiesGrid { grid-template-columns: 1fr; }
+}

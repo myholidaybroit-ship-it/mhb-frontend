@@ -1,8 +1,12 @@
-// Pure presentation helpers (no content data).
+// Image source resolution for the public site.
 //
-// `img(key, w, h)` builds a sized Wix CDN URL from a short slug key. Used for
-// decorative imagery and as a last-resort placeholder when a CMS record has no
-// image set. This is NOT content — all real content comes from the backend.
+// `img(value, w, h)` resolves an image to a usable URL:
+//   1. A real URL (admin-uploaded to S3/CDN, or any http/data URI) is used as-is.
+//   2. A legacy short slug key (e.g. "bali") maps to the seeded Wix CDN image —
+//      kept ONLY so destinations migrated before real uploads existed still show
+//      something. New content should always carry a real image URL.
+//   3. Anything missing/unknown falls back to a neutral in-brand placeholder —
+//      never a stock photo of a different destination.
 
 const SLUG = {
   bali: "nsplsh_657846644f576b59425177~mv2.jpg",
@@ -17,9 +21,22 @@ const SLUG = {
   northeast: "nsplsh_ce21f1ca7cb74b3397fee018e612680b~mv2.jpg",
 };
 
-export const img = (key, w = 1200, h = 800) => {
-  const slug = SLUG[key] || SLUG.bali;
-  return `https://static.wixstatic.com/media/${slug}/v1/fill/w_${w},h_${h},al_c,q_85,enc_avif,quality_auto/${slug}`;
+// Flat cream square in the brand surface colour. Shown only when a record has no
+// image at all, so empty content degrades quietly instead of borrowing a photo.
+const PLACEHOLDER =
+  "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='40'%3E%3Crect%20width='40'%20height='40'%20fill='%23faf7ee'/%3E%3C/svg%3E";
+
+export const img = (value, w = 1200, h = 800) => {
+  if (typeof value === "string" && value) {
+    // Already a real, usable source — admin uploads land here.
+    if (/^https?:\/\//.test(value) || value.startsWith("data:")) return value;
+    // Legacy seeded key → sized Wix CDN URL.
+    const slug = SLUG[value];
+    if (slug) {
+      return `https://static.wixstatic.com/media/${slug}/v1/fill/w_${w},h_${h},al_c,q_85,enc_avif,quality_auto/${slug}`;
+    }
+  }
+  return PLACEHOLDER;
 };
 
 // The canonical adventure-style theme names (also seeded server-side). Used as a

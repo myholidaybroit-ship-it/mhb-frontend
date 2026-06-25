@@ -38,7 +38,7 @@ export default async function Page() {
               {list.map((s) => {
                 const id = s.name || s.id;
                 const count = countFor(id);
-                const src = s.image || img(s.imageKey || "bali", 700, 850);
+                const src = s.image || img(s.imageKey, 700, 850);
                 return (
                   <Link
                     key={id}

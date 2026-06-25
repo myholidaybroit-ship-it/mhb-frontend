@@ -24,33 +24,10 @@ export function packageHref(destSlug, pkgSlug) {
   return `/destinations/${destSlug}/${pkgSlug}`;
 }
 
-// Placeholder packages for destinations the admin hasn't added real packages to
-// yet. Mirrors the fallback the destination detail page renders, so the cards
-// and their detail pages stay in sync.
-export function defaultPackagesFor(dest = {}) {
-  return [
-    {
-      name: `${dest.name} Getaway`,
-      days: 5,
-      nights: 4,
-      price: dest.fromPrice || "On request",
-      route: dest.name,
-      tag: (dest.idealFor || "Trip").split("·")[0].trim(),
-    },
-    {
-      name: `${dest.name} Explorer`,
-      days: 7,
-      nights: 6,
-      price: dest.fromPrice || "On request",
-      route: dest.name,
-      tag: "Explorer",
-    },
-  ];
-}
-
-// The canonical, slugged package list for a destination — real packages when
-// present, else the placeholders. Every package here has a usable `.slug`.
+// The canonical, slugged package list for a destination — strictly the real
+// packages the admin authored. No synthesized placeholders: when a destination
+// has no packages the list is empty, so the UI hides package sections instead
+// of inventing trips the team never created.
 export function resolvePackages(dest) {
-  const list = dest?.packages?.length ? dest.packages : defaultPackagesFor(dest || {});
-  return withPackageSlugs(list);
+  return withPackageSlugs(dest?.packages || []);
 }

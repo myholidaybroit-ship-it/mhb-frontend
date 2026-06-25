@@ -402,7 +402,7 @@ export default function DestinationsList({ destinations }) {
       name: d.name,
       subtitle: d.country,
       price: pkg?.price,
-      image: img(d.imageKey, 600, 600),
+      image: img(d.image || d.imageKey, 600, 600),
       href: `/destinations/${d.slug}`,
     });
   }
@@ -587,7 +587,7 @@ export default function DestinationsList({ destinations }) {
                       >
                         <span className={styles.dropdownThumb}>
                           <Image
-                            src={img(d.imageKey, 120, 120)}
+                            src={img(d.image || d.imageKey, 120, 120)}
                             alt={d.name}
                             fill
                             sizes="40px"
@@ -1001,7 +1001,7 @@ export default function DestinationsList({ destinations }) {
                         aria-label={`View ${d.name}`}
                       >
                         <Image
-                          src={img(d.imageKey, 600, 600)}
+                          src={img(d.image || d.imageKey, 600, 600)}
                           alt={d.name}
                           fill
                           sizes="(max-width: 900px) 100vw, 280px"

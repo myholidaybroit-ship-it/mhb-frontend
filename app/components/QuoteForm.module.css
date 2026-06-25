@@ -1,0 +1,214 @@
+/* Shared quote form — styles copied verbatim from the destination page form so
+   both pages render an identical form. */
+
+.bookCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 22px 50px -36px rgba(0, 0, 0, 0.45);
+}
+
+.formIntro {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--color-border);
+}
+.formIntro h3 {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  margin-bottom: 2px;
+}
+.formIntro p {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  font-weight: 600;
+}
+
+/* Form fields */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.formLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-ink-muted);
+}
+.formLabelIcon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+.formInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+  transition: border-color 0.15s, background 0.15s;
+}
+.formInput::placeholder { color: var(--color-ink-muted); font-weight: 500; }
+.formInput:hover { border-color: var(--color-ink-muted); }
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-ink);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.selectWrap { position: relative; }
+.formSelect {
+  width: 100%;
+  padding: 10px 36px 10px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: border-color 0.15s;
+}
+.formSelect:hover { border-color: var(--color-ink-muted); }
+.formSelect:focus {
+  outline: none;
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+.selectChev {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--color-ink);
+  pointer-events: none;
+}
+
+.travRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+}
+.travRow:last-of-type { border-bottom: 1px solid var(--color-border); margin-bottom: 14px; }
+.travText { display: flex; flex-direction: column; }
+.travText strong { font-size: 14px; font-weight: 800; }
+.travText span { font-size: 12px; color: var(--color-ink-muted); font-weight: 600; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper button {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepper button:hover:not(:disabled) { border-color: var(--color-ink); }
+.stepper button:disabled { opacity: 0.4; cursor: not-allowed; }
+.stepper span { font-weight: 800; min-width: 18px; text-align: center; }
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+.totalRow span { font-size: 13px; font-weight: 700; color: var(--color-ink-muted); }
+.totalRow strong { font-size: 18px; font-weight: 900; letter-spacing: -0.01em; }
+
+.cta {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.cta:hover { background: #000; }
+.ctaGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ctaGhost:hover { border-color: var(--color-ink); }
+.bookFoot { margin-top: 10px; font-size: 11px; color: var(--color-ink-muted); text-align: center; }
+
+.policyLink { color: var(--color-ink); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.policyLink:hover { color: #000; }
+
+/* Success card */
+.successCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.successIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  border: 2px solid #bbf7d0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.successCard h3 {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.015em;
+}
+.successCard p {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+.successCard strong { color: var(--color-ink); font-weight: 800; }

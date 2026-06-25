@@ -320,11 +320,11 @@ export default function TripDetail({ dest, content, related = [] }) {
   const PAY_STAGES = content?.paymentStages || [];
   const TRAVEL_TESTIMONIALS = content?.travelDiaries || [];
 
-  // Catalog destinations may ship without packaged trips / itinerary / overview.
-  // Derive safe defaults so every detail page renders fully and never crashes on
-  // thin data (the admin can refine these per destination later).
-  // Every package — real or placeholder — gets a slug and its own detail page.
+  // Destinations may ship without packaged trips / itinerary / overview. We read
+  // only real, admin-authored packages (no invented ones) and derive safe
+  // fallbacks below so a thin destination still renders fully and never crashes.
   const packages = resolvePackages(dest);
+  const hasPackages = packages.length > 0;
   const itinerary = dest.itinerary || [];
   const overview = dest.overview || [];
   // Highlights come in two shapes: legacy destinations store plain strings,
@@ -350,7 +350,7 @@ export default function TripDetail({ dest, content, related = [] }) {
       name: dest.name,
       subtitle: dest.country,
       price: pkg?.price,
-      image: img(dest.imageKey, 600, 600),
+      image: img(dest.image || dest.imageKey, 600, 600),
       href: `/destinations/${dest.slug}`,
     });
   }
@@ -443,7 +443,15 @@ export default function TripDetail({ dest, content, related = [] }) {
     }, 250);
   }
 
-  const pkg = packages[Math.min(pkgIdx, packages.length - 1)];
+  // Real selected package, or a safe summary derived from the destination itself
+  // (used for the pricing widget / quick facts when no packages exist yet).
+  const pkg = packages[Math.min(pkgIdx, packages.length - 1)] || {
+    name: dest.name,
+    days: 5,
+    nights: 4,
+    price: dest.fromPrice || "On request",
+    route: dest.name,
+  };
 
   const basePrice = priceNumber(pkg.price);
   const taxesPerHead = Math.round(basePrice * 0.05);
@@ -455,7 +463,7 @@ export default function TripDetail({ dest, content, related = [] }) {
   const allImages = useMemo(() => {
     const seen = new Set();
     const out = [];
-    [dest.imageKey, ...(dest.galleryKeys || [])].forEach((k) => {
+    [dest.image, dest.imageKey, ...(dest.galleryKeys || [])].forEach((k) => {
       if (k && !seen.has(k)) { seen.add(k); out.push(k); }
     });
     return out;
@@ -517,9 +525,13 @@ export default function TripDetail({ dest, content, related = [] }) {
   const stats = [
     { icon: I.cal, value: pkg.days, label: "Days" },
     { icon: I.moon, value: pkg.nights ?? pkg.days - 1, label: "Nights" },
-    { icon: I.route, value: pkg.route.split("·").length, label: "Cities" },
-    { icon: I.users, value: "2 – 12", label: "Group size" },
-    { icon: I.compass, value: dest.idealFor.split("·")[0].trim(), label: "Style" },
+    { icon: I.route, value: (pkg.route || dest.name).split("·").length, label: "Cities" },
+    // Group size is hidden by default (solo travellers welcome). The admin can
+    // toggle it on per destination, in which case the real min–max shows.
+    ...(dest.showGroupSize
+      ? [{ icon: I.users, value: `${dest.groupMin || 2} – ${dest.groupMax || 12}`, label: "Group size" }]
+      : []),
+    { icon: I.compass, value: (dest.idealFor || "").split("·")[0].trim() || "Trip", label: "Style" },
   ];
 
   // Sync the day-by-day list to the active package length. If the package
@@ -550,19 +562,21 @@ export default function TripDetail({ dest, content, related = [] }) {
 
   function selectPackage(i) {
     setPkgIdx(i);
-    setOpenDay(0);
-    if (typeof document !== "undefined") {
-      document
-        .getElementById("itinerary-section")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
   }
 
-  const facts = useMemo(() => quickFacts(dest), [dest]);
-  const inclusions = content?.inclusions || [];
-  const exclusions = content?.exclusions || [];
+  // Prefer the admin's per-destination content; fall back to the global content
+  // singleton so edits made on the Destination editor actually reflect here.
+  const facts = useMemo(
+    () =>
+      dest.goodToKnow?.length
+        ? dest.goodToKnow.map((g, i) => ({ key: `gtk${i}`, icon: I.compass, label: g.label, value: g.value }))
+        : quickFacts(dest),
+    [dest]
+  );
+  const inclusions = dest.inclusions?.length ? dest.inclusions : content?.inclusions || [];
+  const exclusions = dest.exclusions?.length ? dest.exclusions : content?.exclusions || [];
   const usps = content?.usps || [];
-  const faqs = (content?.faqs || []).slice(0, 4);
+  const faqs = ((dest.faqs?.length ? dest.faqs : content?.faqs) || []).slice(0, 6);
 
   return (
     <main className={styles.page}>
@@ -638,9 +652,7 @@ export default function TripDetail({ dest, content, related = [] }) {
           {/* Title strip */}
           <header className={styles.titleStrip}>
             <div className={styles.titleLeft}>
-              <h1 className={styles.title}>
-                {dest.name} <span className={styles.titleHl}>{pkg.tag || "Trip"}</span>
-              </h1>
+              <h1 className={styles.title}>{dest.name}</h1>
               <p className={styles.tagline}>{dest.tagline}</p>
               <div className={styles.titleMeta}>
                 <span className={styles.metaChip}>
@@ -669,13 +681,6 @@ export default function TripDetail({ dest, content, related = [] }) {
                 onClick={() => setShareOpen(true)}
               >
                 {I.share()}
-              </button>
-              <button
-                type="button"
-                className={styles.iconBtnText}
-                onClick={() => setPdfOpen(true)}
-              >
-                {I.download()} PDF
               </button>
             </div>
           </header>
@@ -716,6 +721,7 @@ export default function TripDetail({ dest, content, related = [] }) {
 
 
             {/* Packages — image-poster cards */}
+            {hasPackages && (
             <Section title={`${dest.name} packages`} kicker="Pick the trip that fits" id="packages">
               <div
                 className={styles.pkgGrid}
@@ -724,7 +730,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                 {packages.map((p, i) => {
                   const active = i === pkgIdx;
                   const pNights = p.nights ?? p.days - 1;
-                  const pImg = heroImages[i % heroImages.length];
+                  const pImg = p.image || heroImages[i % heroImages.length];
                   const pOrig = p.original ? Number(String(p.original).replace(/[^\d]/g, "")) : null;
                   const pNow = Number(String(p.price).replace(/[^\d]/g, ""));
                   const savings = pOrig && pNow < pOrig ? pOrig - pNow : 0;
@@ -815,67 +821,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                 })}
               </div>
             </Section>
-
-            {/* Itinerary — synced to active package */}
-            <Section
-              id="itinerary-section"
-              title="Day-by-day itinerary"
-              kicker={`${pkg.name} · ${pkg.days}D / ${pkg.nights ?? pkg.days - 1}N`}
-            >
-              <div className={styles.itinPkgBar}>
-                <div className={styles.itinPkgInfo}>
-                  <strong>{pkg.name}</strong>
-                  <span>{I.pin(12)} {pkg.route} · {pkg.days} days</span>
-                </div>
-                {packages.length > 1 && (
-                  <div className={styles.itinPkgSwitch}>
-                    <span className={styles.itinPkgSwitchLabel}>Switch:</span>
-                    {packages.map((p, i) => (
-                      <button
-                        key={p.name}
-                        type="button"
-                        className={`${styles.itinPkgChip} ${i === pkgIdx ? styles.itinPkgChipOn : ""}`}
-                        onClick={() => selectPackage(i)}
-                        aria-pressed={i === pkgIdx}
-                      >
-                        {p.days}D
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className={styles.itinList}>
-                {itinDays.map((d, i) => {
-                  const open = openDay === i;
-                  return (
-                    <div key={d.day} className={`${styles.itinRow} ${open ? styles.itinOpen : ""}`}>
-                      <button
-                        type="button"
-                        className={styles.itinHead}
-                        onClick={() => setOpenDay(open ? -1 : i)}
-                        aria-expanded={open}
-                      >
-                        <span className={styles.itinDay}>Day {d.day}</span>
-                        <span className={styles.itinTitle}>{d.title}</span>
-                        <span className={styles.itinChev}>{I.chevDown()}</span>
-                      </button>
-                      {open && (
-                        <div className={styles.itinBody}>
-                          <p>{d.desc}</p>
-                          <div className={styles.itinTags}>
-                            <span>{I.bed(12)} Stay</span>
-                            <span>{I.coffee(12)} Breakfast</span>
-                            <span>{I.car(12)} Transfer</span>
-                            <span>{I.cam(12)} Sightseeing</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </Section>
+            )}
 
             {/* Don't miss these — must-do activities */}
             <Section title="Don't miss these" kicker="Top experiences on this trip">
@@ -924,7 +870,7 @@ export default function TripDetail({ dest, content, related = [] }) {
             {promo && (
               <Link href={`/destinations/${promo.slug}`} className={styles.promoBanner}>
                 <Image
-                  src={img(promo.imageKey, 1400, 500)}
+                  src={img(promo.image || promo.imageKey, 1400, 500)}
                   alt={`${promo.name}`}
                   fill
                   sizes="(max-width: 900px) 100vw, 800px"
@@ -1334,12 +1280,12 @@ export default function TripDetail({ dest, content, related = [] }) {
           </header>
           <div className={styles.relGrid}>
             {related.map((r) => {
-              const p = r.packages[0];
+              const p = r.packages?.[0];
               return (
                 <Link key={r.slug} href={`/destinations/${r.slug}`} className={styles.relCard}>
                   <div className={styles.relImg}>
                     <Image
-                      src={img(r.imageKey, 600, 700)}
+                      src={img(r.image || r.imageKey, 600, 700)}
                       alt={r.name}
                       fill
                       sizes="(max-width: 900px) 45vw, 24vw"
@@ -1349,7 +1295,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                   </div>
                   <div className={styles.relBody}>
                     <h4>{r.name}</h4>
-                    <span className={styles.relMeta}>{I.star(12)} {r.rating.toFixed(1)} · {p?.days || 5}D</span>
+                    <span className={styles.relMeta}>{I.star(12)} {(r.rating ?? 4.8).toFixed(1)} · {p?.days || 5}D</span>
                     <span className={styles.relPrice}>From <strong>{r.fromPrice}</strong></span>
                   </div>
                 </Link>
@@ -1449,188 +1395,6 @@ export default function TripDetail({ dest, content, related = [] }) {
                 Facebook
               </a>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── PDF request modal ─── */}
-      {pdfOpen && (
-        <div
-          className={styles.modalOverlay}
-          onClick={closePdf}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Get itinerary PDF"
-        >
-          <div
-            className={`${styles.modalCard} ${styles.modalSplit}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {pdfSent ? (
-              <div className={styles.modalSuccess}>
-                <span className={styles.successIcon}>{I.check(28, "#16a34a")}</span>
-                <h3>PDF on the way</h3>
-                <p>
-                  We&apos;ve emailed the <strong>{pkg.name}</strong> itinerary to{" "}
-                  <strong>{pdfEmail}</strong>.
-                </p>
-                <button type="button" className={styles.cta} onClick={closePdf}>
-                  Done
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Left: promotional image */}
-                <aside className={styles.modalAside} aria-hidden>
-                  <Image
-                    src={img(dest.imageKey, 800, 1100)}
-                    alt=""
-                    fill
-                    sizes="(max-width: 700px) 100vw, 380px"
-                    className={styles.galImg}
-                  />
-                  <div className={styles.modalAsideOverlay}>
-                    <span className={styles.modalAsideKicker}>The abode of</span>
-                    <h4 className={styles.modalAsideTitle}>{dest.name}</h4>
-                    <span className={styles.modalAsideSub}>
-                      {pkg.name} · {pkg.days} Days
-                    </span>
-                    <span className={styles.modalAsideBadge}>
-                      {I.download(12)} Free Itinerary PDF
-                    </span>
-                  </div>
-                </aside>
-
-                {/* Right: form */}
-                <div className={styles.modalContent}>
-                  <header className={styles.modalHead}>
-                    <div>
-                      <h3 className={styles.modalTitle}>Plan Your Next Trip</h3>
-                      <p className={styles.modalSub}>
-                        Drop your details — we&apos;ll email the full {dest.name} itinerary.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.modalClose}
-                      onClick={closePdf}
-                      aria-label="Close"
-                    >
-                      {I.close(18)}
-                    </button>
-                  </header>
-
-                  <form className={styles.modalForm} onSubmit={handlePdfSubmit} noValidate>
-                    <div className={styles.formRow}>
-                      <div className={styles.formGroup}>
-                        <label htmlFor="pdf-first" className={styles.formLabel}>
-                          First Name <span className={styles.required}>*</span>
-                        </label>
-                        <input
-                          id="pdf-first"
-                          type="text"
-                          required
-                          autoComplete="given-name"
-                          value={pdfFirst}
-                          onChange={(e) => setPdfFirst(e.target.value)}
-                          placeholder="First name"
-                          className={styles.formInput}
-                        />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label htmlFor="pdf-last" className={styles.formLabel}>
-                          Last Name
-                        </label>
-                        <input
-                          id="pdf-last"
-                          type="text"
-                          autoComplete="family-name"
-                          value={pdfLast}
-                          onChange={(e) => setPdfLast(e.target.value)}
-                          placeholder="Last name"
-                          className={styles.formInput}
-                        />
-                      </div>
-                    </div>
-
-                    <div className={styles.formRow}>
-                      <div className={styles.formGroup}>
-                        <label htmlFor="pdf-email" className={styles.formLabel}>
-                          Email <span className={styles.required}>*</span>
-                        </label>
-                        <input
-                          id="pdf-email"
-                          type="email"
-                          required
-                          autoComplete="email"
-                          value={pdfEmail}
-                          onChange={(e) => setPdfEmail(e.target.value)}
-                          placeholder="you@email.com"
-                          className={styles.formInput}
-                        />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label htmlFor="pdf-phone" className={styles.formLabel}>
-                          Phone <span className={styles.required}>*</span>
-                        </label>
-                        <div className={styles.phoneRow}>
-                          <span className={styles.phonePrefix}>
-                            <span className={styles.flag} aria-hidden>🇮🇳</span> +91
-                          </span>
-                          <input
-                            id="pdf-phone"
-                            type="tel"
-                            required
-                            autoComplete="tel"
-                            value={pdfPhone}
-                            onChange={(e) => setPdfPhone(e.target.value)}
-                            placeholder="9XXXXXXXXX"
-                            className={`${styles.formInput} ${styles.phoneInput}`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label htmlFor="pdf-pkg" className={styles.formLabel}>
-                        Which package do you prefer? <span className={styles.required}>*</span>
-                      </label>
-                      <div className={styles.selectWrap}>
-                        <select
-                          id="pdf-pkg"
-                          value={pkgIdx}
-                          onChange={(e) => setPkgIdx(Number(e.target.value))}
-                          className={styles.formSelect}
-                        >
-                          {packages.map((p, i) => (
-                            <option key={p.name} value={i}>
-                              {p.name} — {p.days}D · {p.price}
-                            </option>
-                          ))}
-                        </select>
-                        <span className={styles.selectChev}>{I.chevDown(14)}</span>
-                      </div>
-                    </div>
-
-                    <label className={styles.consentRow}>
-                      <input type="checkbox" defaultChecked className={styles.consentBox} />
-                      <span>
-                        Keep me updated with offers, trips and travel inspiration via email, SMS and WhatsApp.
-                      </span>
-                    </label>
-
-                    <button type="submit" className={styles.cta}>
-                      {I.download(14)} Send me the PDF
-                    </button>
-                    <p className={styles.bookFoot}>
-                      By submitting you agree to our{" "}
-                      <Link href="/terms" className={styles.policyLink}>Terms</Link> &amp;{" "}
-                      <Link href="/terms#privacy" className={styles.policyLink}>Privacy</Link>.
-                    </p>
-                  </form>
-                </div>
-              </>
-            )}
           </div>
         </div>
       )}

@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import MonthPicker from "../../../components/MonthPicker";
+import QuoteForm from "../../../components/QuoteForm";
 import { useWishlist } from "../../../components/WishlistContext";
-import { forms } from "../../../lib/api";
 import { img } from "../../../lib/img";
 import { withPackageSlugs } from "../../../lib/packages";
 import styles from "./PackageDetail.module.css";
@@ -111,6 +110,16 @@ export default function PackageDetail({ dest, pkg, content }) {
     .map((h) => (typeof h === "string" ? h : h?.text || ""))
     .filter(Boolean);
 
+  // Rich content — prefer the package's own values, fall back to the destination,
+  // then the global content singleton, so admin edits at any level reflect here.
+  const idealFor = (pkg.idealFor || dest.idealFor || "")
+    .split("·").map((s) => s.trim()).filter(Boolean);
+  // FAQs and good-to-know are package-specific — managed separately from the
+  // destination (no cross-fallback) so each page can show different content.
+  const goodToKnow = pkg.goodToKnow || [];
+  const faqs = (pkg.faqs || []).slice(0, 6);
+  const stories = content?.travelDiaries || [];
+
   // Other packages in this destination, for cross-linking.
   const siblings = useMemo(
     () => withPackageSlugs(dest.packages || []).filter((p) => p.slug !== pkg.slug),
@@ -120,7 +129,7 @@ export default function PackageDetail({ dest, pkg, content }) {
   const galleryKeys = useMemo(() => {
     const seen = new Set();
     const out = [];
-    [dest.imageKey, ...(dest.galleryKeys || [])].forEach((k) => {
+    [dest.image, dest.imageKey, ...(dest.galleryKeys || [])].forEach((k) => {
       if (k && !seen.has(k)) { seen.add(k); out.push(k); }
     });
     return out.slice(0, 4);
@@ -130,7 +139,7 @@ export default function PackageDetail({ dest, pkg, content }) {
   const orig = pkg.original ? priceNumber(pkg.original) : 0;
   const savings = orig && now && orig > now ? orig - now : 0;
 
-  const heroSrc = pickSrc(pkg.image, dest.imageKey, 1600, 900);
+  const heroSrc = pickSrc(pkg.image || dest.image, dest.imageKey, 1600, 900);
 
   // Wishlist
   const { has, toggle, hydrated } = useWishlist();
@@ -143,33 +152,17 @@ export default function PackageDetail({ dest, pkg, content }) {
       name: pkg.name,
       subtitle: dest.name,
       price: pkg.price,
-      image: pickSrc(pkg.image, dest.imageKey, 600, 600),
+      image: pickSrc(pkg.image || dest.image, dest.imageKey, 600, 600),
       href: `/destinations/${dest.slug}/${pkg.slug}`,
     });
   }
 
-  // Enquiry form
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [travelMonth, setTravelMonth] = useState("");
-  const [sent, setSent] = useState(false);
-  function submitEnquiry(e) {
-    e.preventDefault();
-    if (!name.trim() || !email.trim() || !phone.trim()) return;
-    forms
-      .enquiry({
-        type: "quote",
-        name,
-        email,
-        phone,
-        travelMonth,
-        destination: dest.name,
-        package: `${pkg.name} — ${pkg.days}D/${nights}N · ${pkg.price}`,
-      })
-      .catch((err) => console.error("Package enquiry failed:", err.message));
-    setSent(true);
-  }
+  const [openFaq, setOpenFaq] = useState(0);
+
+  // All packages in this destination (for the quote form's package dropdown),
+  // with the current package preselected.
+  const allPackages = useMemo(() => withPackageSlugs(dest.packages || []), [dest]);
+  const currentPkgIdx = Math.max(0, allPackages.findIndex((p) => p.slug === pkg.slug));
 
   return (
     <main className={styles.page}>
@@ -239,6 +232,16 @@ export default function PackageDetail({ dest, pkg, content }) {
               </Block>
             )}
 
+            {idealFor.length > 0 && (
+              <Block title="Who it's for">
+                <div className={styles.whoRow}>
+                  {idealFor.map((w) => (
+                    <span key={w} className={styles.whoPill}>{w}</span>
+                  ))}
+                </div>
+              </Block>
+            )}
+
             <Block title="Day-by-day itinerary" subtitle={`${pkg.days} days / ${nights} nights`}>
               <ol className={styles.itin}>
                 {itinDays.map((d, i) => (
@@ -280,6 +283,38 @@ export default function PackageDetail({ dest, pkg, content }) {
               </Block>
             )}
 
+            {goodToKnow.length > 0 && (
+              <Block title="Good to know">
+                <div className={styles.factsGrid}>
+                  {goodToKnow.map((f, i) => (
+                    <div key={i} className={styles.factCard}>
+                      <span className={styles.factLabel}>{f.label}</span>
+                      <strong className={styles.factValue}>{f.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              </Block>
+            )}
+
+            {faqs.length > 0 && (
+              <Block title="Quick FAQs">
+                <div className={styles.faqList}>
+                  {faqs.map((f, i) => {
+                    const open = openFaq === i;
+                    return (
+                      <div key={i} className={`${styles.faqRow} ${open ? styles.faqOpen : ""}`}>
+                        <button type="button" className={styles.faqHead} onClick={() => setOpenFaq(open ? -1 : i)} aria-expanded={open}>
+                          <span>{f.q}</span>
+                          <span className={styles.faqIcon}>{open ? "–" : "+"}</span>
+                        </button>
+                        {open && <p className={styles.faqBody}>{f.a}</p>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </Block>
+            )}
+
             <Link href={`/destinations/${dest.slug}`} className={styles.backLink}>
               ← See all {dest.name} packages
             </Link>
@@ -313,26 +348,15 @@ export default function PackageDetail({ dest, pkg, content }) {
                   {Icon.download(15)} {pkg.pdf.name || "Download brochure"}
                 </a>
               )}
-
-              <div className={styles.divider} aria-hidden />
-
-              {sent ? (
-                <div className={styles.thanks}>
-                  <strong>Thanks, {name.split(" ")[0] || "traveller"}!</strong>
-                  <p>Our advisor will reach out shortly with a tailored quote for the {pkg.name}.</p>
-                </div>
-              ) : (
-                <form className={styles.form} onSubmit={submitEnquiry}>
-                  <h3 className={styles.formTitle}>Get a free quote</h3>
-                  <input className={styles.input} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
-                  <input className={styles.input} type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                  <input className={styles.input} type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-                  <MonthPicker value={travelMonth} onChange={setTravelMonth} placeholder="Travel month" />
-                  <button type="submit" className={styles.cta}>Request quote</button>
-                  <p className={styles.formNote}>No spam — just a quick, personalised plan.</p>
-                </form>
-              )}
             </div>
+
+            {/* Exact same enquiry form as the destination page */}
+            <QuoteForm
+              destName={dest.name}
+              packages={allPackages}
+              initialPkgIdx={currentPkgIdx}
+              fallbackPkg={pkg}
+            />
           </aside>
         </div>
 
@@ -346,7 +370,7 @@ export default function PackageDetail({ dest, pkg, content }) {
                 return (
                   <Link key={p.slug} href={`/destinations/${dest.slug}/${p.slug}`} className={styles.sibCard}>
                     <div className={styles.sibImg}>
-                      <Image src={pickSrc(p.image, dest.imageKey, 500, 400)} alt={p.name} fill sizes="(max-width:700px) 90vw, 30vw" className={styles.heroImage} />
+                      <Image src={pickSrc(p.image || dest.image, dest.imageKey, 500, 400)} alt={p.name} fill sizes="(max-width:700px) 90vw, 30vw" className={styles.heroImage} />
                     </div>
                     <div className={styles.sibInfo}>
                       <strong>{p.name}</strong>
@@ -359,6 +383,39 @@ export default function PackageDetail({ dest, pkg, content }) {
                   </Link>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Travel stories — read the story, then go for it */}
+        {stories.length > 0 && (
+          <div className={styles.stories}>
+            <div className={styles.storiesHead}>
+              <span className={styles.storiesKicker}>Travel diaries</span>
+              <h2 className={styles.storiesTitle}>Read the story, then go for it</h2>
+              <p className={styles.storiesLead}>Real postcards from MyHolidayBro travellers.</p>
+            </div>
+            <div className={styles.storiesGrid}>
+              {stories.slice(0, 6).map((t, i) => (
+                <article key={i} className={styles.storyCard}>
+                  <div className={styles.storyQuoteMark} aria-hidden>“</div>
+                  <p className={styles.storyBody}>{t.body}</p>
+                  <div className={styles.storyStars} aria-hidden>
+                    {Array.from({ length: 5 }).map((_, k) => (
+                      <span key={k}>{Icon.star(14)}</span>
+                    ))}
+                  </div>
+                  <footer className={styles.storyFoot}>
+                    <span className={styles.storyAvatar} style={{ background: t.accent || "#ffde5f" }}>
+                      {t.initials || (t.name || "?")[0]}
+                    </span>
+                    <div className={styles.storyMeta}>
+                      <strong>{t.name}</strong>
+                      <span>{[t.city, t.when].filter(Boolean).join(" · ")}</span>
+                    </div>
+                  </footer>
+                </article>
+              ))}
             </div>
           </div>
         )}
