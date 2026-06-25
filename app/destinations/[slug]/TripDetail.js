@@ -952,7 +952,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                   <span className={styles.successIcon}>{I.check(28, "#16a34a")}</span>
                   <h3>Enquiry sent</h3>
                   <p>
-                    Our advisor will call <strong>{phone}</strong> within 2 hours about
+                    We&apos;ll get in touch on <strong>{phone}</strong> shortly about
                     your <strong>{pkg.name}</strong> trip.
                   </p>
                   <button
@@ -1088,7 +1088,7 @@ export default function TripDetail({ dest, content, related = [] }) {
                 </div>
 
                 <button type="submit" className={styles.cta}>Send enquiry</button>
-                <a href="tel:+910000000000" className={styles.ctaGhost}>{I.phone()} Talk to advisor</a>
+                <a href="https://wa.me/919666698990" target="_blank" rel="noopener noreferrer" className={styles.ctaGhost}>{I.whatsapp(17)} Chat on WhatsApp</a>
                 <p className={styles.bookFoot}>
                   No payment now · we&apos;ll get in touch shortly.<br />
                   By submitting you agree to our{" "}

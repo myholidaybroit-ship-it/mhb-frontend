@@ -97,12 +97,15 @@ export default function PackageDetail({ dest, pkg, content, moments = [] }) {
     ? dest.exclusions
     : content?.exclusions || [];
 
-  const overview =
-    pkg.overview?.length ? pkg.overview : dest.overview || [];
+  // About is per-package — strictly the package's own intro, independent of the
+  // destination's "About" (each can be different). Hidden when the package has none.
+  const overview = pkg.overview || [];
   // Highlights come in two shapes: legacy destinations store plain strings,
   // while the admin form saves { text, icon } objects. Normalize to strings so
   // they render either way (rendering an object as a child crashes React).
-  const highlights = (dest.highlights || [])
+  // Trip highlights are per-package — strictly the package's own (no destination
+  // fallback). The section is hidden when the package has none set.
+  const highlights = (pkg.highlights || [])
     .map((h) => (typeof h === "string" ? h : h?.text || ""))
     .filter(Boolean);
 

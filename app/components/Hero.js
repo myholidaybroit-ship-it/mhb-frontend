@@ -27,12 +27,40 @@ export default function Hero({ data, destinations = [] }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
+  const videoRef = useRef(null);
 
   const videoUrl = data?.videoUrl;
   const accent = data?.accentWord || "Holiday";
   const headline = data?.headline; // e.g. "Plan your next Holiday"
   const lede = data?.subheading || "Handpicked trips, ready when you are.";
   const placeholder = data?.searchPlaceholder || "Where do you want to go?";
+
+  // Reliable background-video autoplay on mobile (esp. iOS Safari). React's JSX
+  // `muted` is not always applied as a property in time, so we force it here and
+  // kick off play(), retrying once the video is ready and on the first touch.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !videoUrl) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", "true");
+    const play = () => {
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    };
+    play();
+    v.addEventListener("loadeddata", play, { once: true });
+    v.addEventListener("canplay", play, { once: true });
+    const onTouch = () => play();
+    window.addEventListener("touchstart", onTouch, { once: true, passive: true });
+    return () => {
+      v.removeEventListener("loadeddata", play);
+      v.removeEventListener("canplay", play);
+      window.removeEventListener("touchstart", onTouch);
+    };
+  }, [videoUrl]);
 
   // Live results — filter the destinations list as the user types.
   const matches = useMemo(() => {
@@ -88,6 +116,7 @@ export default function Hero({ data, destinations = [] }) {
   return (
     <section className={styles.hero}>
       <video
+        ref={videoRef}
         className={styles.video}
         src={videoUrl}
         autoPlay
@@ -95,6 +124,7 @@ export default function Hero({ data, destinations = [] }) {
         muted
         playsInline
         preload="auto"
+        poster={data?.videoPoster || undefined}
         aria-hidden="true"
       />
       <div className={styles.overlay} aria-hidden />
